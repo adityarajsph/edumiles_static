@@ -1,0 +1,1 @@
+const fs=require('fs'),path=require('path');const b='C:/Users/yuvra/OneDrive/Desktop/edumiles_landing/edumiles-travels';function w(r,c){const p=path.join(b,r);fs.mkdirSync(path.dirname(p),{recursive:true});fs.writeFileSync(p,c,'utf8');console.log('Written: '+r);}module.exports=w;

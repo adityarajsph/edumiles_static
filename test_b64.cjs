@@ -1,0 +1,1 @@
+const fs=require(String.fromCharCode(102,115));const content=Buffer.from('aGVsbG8gd29ybGQKbGluZSB0d28K','base64').toString('utf8');fs.writeFileSync('C:/Users/yuvra/OneDrive/Desktop/edumiles_landing/edumiles-travels/test_b64.txt',content,'utf8');console.log('ok');

@@ -1,0 +1,1 @@
+const fs=require('fs');const path=require('path');const B='C:/Users/yuvra/OneDrive/Desktop/edumiles_landing/edumiles-travels';const wf=(r,c)=>{const p=path.join(B,r);fs.mkdirSync(path.dirname(p),{recursive:true});fs.writeFileSync(p,c,'utf8');console.log('OK: '+r);};const decode=(b64)=>Buffer.from(b64,'base64').toString('utf8');

@@ -1,0 +1,1 @@
+﻿import fs from fs; import path from path; const b = C:/Users/yuvra/OneDrive/Desktop/edumiles_landing/edumiles-travels; function w(rel,content){const p=path.join(b,rel);fs.mkdirSync(path.dirname(p),{recursive:true});fs.writeFileSync(p,content,utf8);console.log(Written: +rel);} w(test.txt,hello); console.log(DONE);
