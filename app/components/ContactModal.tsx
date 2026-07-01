@@ -6,6 +6,8 @@ import {
   Send, CheckCircle, ChevronDown, Loader2,
 } from "lucide-react";
 
+const WEB3FORMS_KEY = "c8845256-7de7-475d-a9ec-4f5a046fec6d";
+
 interface ContactModalProps {
   open: boolean;
   onClose: () => void;
@@ -35,16 +37,25 @@ export default function ContactModal({ open, onClose, subject }: ContactModalPro
   });
   const [sending, setSending] = useState(false);
   const [done, setDone]       = useState(false);
+  const [apiError, setApiError] = useState("");
   const [errors, setErrors]   = useState<Record<string, string>>({});
   const overlayRef            = useRef<HTMLDivElement>(null);
 
-  /* Reset when modal reopens */
+  /* Full reset every time the modal opens */
   useEffect(() => {
     if (open) {
       setDone(false);
       setSending(false);
       setErrors({});
-      setForm(f => ({ ...f, interest: subject || f.interest }));
+      setApiError("");
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        destination: "",
+        interest: subject || "",
+        message: "",
+      });
     }
   }, [open, subject]);
 
@@ -67,19 +78,55 @@ export default function ContactModal({ open, onClose, subject }: ContactModalPro
 
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!form.name.trim())                               e.name     = "Name is required";
-    if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email)) e.email = "Valid email required";
+    if (!form.name.trim())                                         e.name  = "Name is required";
+    if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email))   e.email = "Valid email required";
     if (!form.phone.trim() || form.phone.replace(/\D/g, "").length < 10) e.phone = "Valid 10-digit phone required";
     return e;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (sending) return;          // guard against double submission
     const errs = validate();
     if (Object.keys(errs).length) { setErrors(errs); return; }
+
     setSending(true);
-    /* Simulate API call */
-    setTimeout(() => { setSending(false); setDone(true); }, 1800);
+    setApiError("");
+
+    try {
+      const payload = {
+        access_key: WEB3FORMS_KEY,
+        subject: form.interest
+          ? `New Enquiry – ${form.interest} | EdumilesTravels`
+          : "New Travel Enquiry | EdumilesTravels",
+        from_name: "EdumilesTravels Website",
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        destination: form.destination || "Not specified",
+        package_type: form.interest  || "Not specified",
+        message: form.message        || "No message provided",
+        botcheck: "",   // honeypot — must be empty
+      };
+
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setDone(true);
+      } else {
+        setApiError(data.message || "Something went wrong. Please try again.");
+      }
+    } catch {
+      setApiError("Network error. Please check your connection and try again.");
+    } finally {
+      setSending(false);
+    }
   };
 
   const set = (field: string) => (
@@ -137,7 +184,6 @@ export default function ContactModal({ open, onClose, subject }: ContactModalPro
             position: "relative",
             flexShrink: 0,
           }}>
-            {/* decorative blobs */}
             <div style={{ position: "absolute", top: -30, right: -30, width: 160, height: 160, borderRadius: "50%", background: "radial-gradient(circle,rgba(254,129,0,0.28) 0%,transparent 70%)", pointerEvents: "none" }} />
             <div style={{ position: "absolute", bottom: -20, left: -20, width: 120, height: 120, borderRadius: "50%", background: "radial-gradient(circle,rgba(254,129,0,0.18) 0%,transparent 70%)", pointerEvents: "none" }} />
 
@@ -170,10 +216,7 @@ export default function ContactModal({ open, onClose, subject }: ContactModalPro
                 <MessageSquare size={20} color="#fff" />
               </div>
               <div>
-                <h2 style={{
-                  fontFamily: "'Poppins',sans-serif", fontWeight: 800,
-                  fontSize: 20, color: "#fff", lineHeight: 1.2,
-                }}>
+                <h2 style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 800, fontSize: 20, color: "#fff", lineHeight: 1.2 }}>
                   Plan Your Journey
                 </h2>
                 <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 13, marginTop: 2 }}>
@@ -207,19 +250,19 @@ export default function ContactModal({ open, onClose, subject }: ContactModalPro
                   Request Received!
                 </h3>
                 <p style={{ color: "#64748b", fontSize: 15, lineHeight: 1.7, maxWidth: 340 }}>
-                  Thank you, <strong>{form.name.split(" ")[0]}</strong>! Our travel expert will contact you within <strong style={{ color: "#FE8100" }}>2 hours</strong>.
+                  Thank you, <strong>{form.name.split(" ")[0]}</strong>! Our travel expert will contact you within{" "}
+                  <strong style={{ color: "#FE8100" }}>2 hours</strong>.
                 </p>
-                <button
-                  onClick={onClose}
-                  className="btn-primary"
-                  style={{ marginTop: 8 }}
-                >
+                <button onClick={onClose} className="btn-primary" style={{ marginTop: 8 }}>
                   Close
                 </button>
               </div>
             ) : (
               /* ── Form ── */
               <form onSubmit={handleSubmit} noValidate>
+                {/* Honeypot — hidden from users, catches bots */}
+                <input type="checkbox" name="botcheck" style={{ display: "none" }} />
+
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
 
                   {/* Name */}
@@ -286,6 +329,18 @@ export default function ContactModal({ open, onClose, subject }: ContactModalPro
                   </Field>
                 </div>
 
+                {/* API-level error */}
+                {apiError && (
+                  <div style={{
+                    marginTop: 14, padding: "12px 16px",
+                    background: "#fef2f2", border: "1px solid #fecaca",
+                    borderRadius: 12, color: "#dc2626", fontSize: 13,
+                    display: "flex", alignItems: "center", gap: 8,
+                  }}>
+                    <X size={14} /> {apiError}
+                  </div>
+                )}
+
                 <button
                   type="submit"
                   disabled={sending}
@@ -313,9 +368,9 @@ export default function ContactModal({ open, onClose, subject }: ContactModalPro
       </div>
 
       <style>{`
-        @keyframes fadeIn  { from { opacity: 0; }                           to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(40px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        @keyframes popIn   { from { transform: scale(0.5); opacity: 0; }   to { transform: scale(1); opacity: 1; } }
+        @keyframes fadeIn  { from { opacity: 0; }                                                    to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(40px) scale(0.97); }           to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes popIn   { from { transform: scale(0.5); opacity: 0; }                             to { transform: scale(1); opacity: 1; } }
         @keyframes spin    { to   { transform: rotate(360deg); } }
       `}</style>
     </>
