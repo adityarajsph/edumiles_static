@@ -117,8 +117,8 @@ export default function Footer() {
                   Icon: MapPin,
                   text: "Unit No - 806, KLJ TOWER, Netaji Subhash Place,\nShakurpur, New Delhi, Delhi – 110034",
                 },
-                { Icon: Phone, text: "+91 99558 92640", href: "tel:+919955892640" },
-                { Icon: Mail,  text: "hello@edumilestravels.com", href: "mailto:hello@edumilestravels.com" },
+                { Icon: Phone, text: "+91 87966 73667", href: "tel:+918796673667" },
+                { Icon: Mail,  text: "edumilestravel@gmail.com", href: "mailto:edumilestravel@gmail.com" },
               ].map(({ Icon, text, href }) => (
                 <div key={text} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
                   <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
