@@ -3,17 +3,24 @@
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const navLinks = [
-  { href: "#home",         label: "Home" },
-  { href: "#packages",     label: "Packages" },
-  { href: "#about",        label: "About" },
-  { href: "#contact",      label: "Contact" },
+  { href: "/",          label: "Home" },
+  { href: "/packages",  label: "Packages" },
+  { href: "/about",     label: "About" },
+  { href: "/contact",   label: "Contact" },
 ];
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen]         = useState(false);
+  const pathname                = usePathname();
+
+  // On sub-pages the hero is not present, so always show the solid navbar style
+  const isHome   = pathname === "/";
+  const solidNav = scrolled || !isHome;
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 30);
@@ -25,42 +32,50 @@ export default function Navbar() {
     <nav style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
       transition: "all 0.4s ease",
-      background: scrolled ? "rgba(255,255,255,0.92)" : "transparent",
+      background: solidNav ? "rgba(255,255,255,0.95)" : "transparent",
       backdropFilter: "blur(18px)",
       WebkitBackdropFilter: "blur(18px)",
-      boxShadow: scrolled ? "0 2px 24px rgba(0,0,0,0.08)" : "none",
-      borderBottom: scrolled ? "1px solid rgba(0,0,0,0.06)" : "none",
+      boxShadow: solidNav ? "0 2px 24px rgba(0,0,0,0.08)" : "none",
+      borderBottom: solidNav ? "1px solid rgba(0,0,0,0.06)" : "none",
     }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 76 }}>
 
           {/* Logo */}
-          <a href="#home" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
             <Image
               src="/edumiles.png"
               alt="EdumilesTravels"
               width={140}
               height={48}
-              style={{ objectFit: "contain"}}
+              style={{ objectFit: "contain" }}
               priority
             />
-          </a>
+          </Link>
 
           {/* Desktop links */}
           <div style={{ display: "flex", alignItems: "center", gap: 32 }} className="hide-mobile">
-            {navLinks.map(l => (
-              <a key={l.href} href={l.href} style={{
-                fontFamily: "'Inter',sans-serif", fontWeight: 500, fontSize: 14,
-                color: scrolled ? "#0127FC" : "rgba(255,255,255,0.9)",
-                textDecoration: "none",
-                transition: "color 0.3s",
-              }}
-              onMouseEnter={e => (e.currentTarget.style.color = "#FE8100")}
-              onMouseLeave={e => (e.currentTarget.style.color = scrolled ? "#0127FC" : "rgba(255,255,255,0.9)")}
-              >
-                {l.label}
-              </a>
-            ))}
+            {navLinks.map(l => {
+              const active = pathname === l.href;
+              return (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  style={{
+                    fontFamily: "'Inter',sans-serif", fontWeight: active ? 700 : 500, fontSize: 14,
+                    color: active ? "#FE8100" : solidNav ? "#0127FC" : "rgba(255,255,255,0.9)",
+                    textDecoration: "none",
+                    transition: "color 0.3s",
+                    borderBottom: active ? "2px solid #FE8100" : "2px solid transparent",
+                    paddingBottom: 2,
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "#FE8100")}
+                  onMouseLeave={e => (e.currentTarget.style.color = active ? "#FE8100" : solidNav ? "#0127FC" : "rgba(255,255,255,0.9)")}
+                >
+                  {l.label}
+                </Link>
+              );
+            })}
             <span style={{
               display: "inline-flex", alignItems: "center", gap: 6,
               background: "rgba(254,129,0,0.12)", border: "1px solid rgba(254,129,0,0.35)",
@@ -81,7 +96,7 @@ export default function Navbar() {
             className="show-mobile"
             style={{
               background: "none", border: "none", cursor: "pointer", padding: 8,
-              color: scrolled ? "#0127FC" : "#fff",
+              color: solidNav ? "#0127FC" : "#fff",
             }}
             aria-label="Toggle menu"
           >
@@ -100,18 +115,28 @@ export default function Navbar() {
             margin: "0 0 12px", boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
             border: "1px solid #f1f5f9",
           }}>
-            {navLinks.map(l => (
-              <a key={l.href} href={l.href} onClick={() => setOpen(false)} style={{
-                display: "block", padding: "12px 16px", color: "#0127FC",
-                fontWeight: 600, textDecoration: "none", borderRadius: 12,
-                fontSize: 15, transition: "background 0.2s",
-              }}
-              onMouseEnter={e => (e.currentTarget.style.background = "#fff7ee")}
-              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-              >
-                {l.label}
-              </a>
-            ))}
+            {navLinks.map(l => {
+              const active = pathname === l.href;
+              return (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setOpen(false)}
+                  style={{
+                    display: "block", padding: "12px 16px",
+                    color: active ? "#FE8100" : "#0127FC",
+                    fontWeight: active ? 700 : 600,
+                    textDecoration: "none", borderRadius: 12,
+                    fontSize: 15, transition: "background 0.2s",
+                    background: active ? "#fff7ee" : "transparent",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = "#fff7ee")}
+                  onMouseLeave={e => (e.currentTarget.style.background = active ? "#fff7ee" : "transparent")}
+                >
+                  {l.label}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>
