@@ -16,7 +16,7 @@ const stats = [
   { Icon: Users,      num: "2000+", label: "Happy Travellers", bg: "#fff7ed", iconBg: "#FE8100" },
   { Icon: MapPin,     num: "500+",  label: "Destinations",     bg: "#eff6ff", iconBg: "#0127FC" },
   { Icon: Award,      num: "7+",    label: "Years Experience", bg: "#f5f3ff", iconBg: "#7c3aed" },
-  { Icon: TrendingUp, num: "4.9★",  label: "Customer Rating",  bg: "#f0fdf4", iconBg: "#059669" },
+  { Icon: TrendingUp, num: "4.9",  label: "Customer Rating",  bg: "#f0fdf4", iconBg: "#059669" },
 ];
 
 const values = [
@@ -146,7 +146,9 @@ export default function AboutPage() {
                         <s.Icon size={18} color={s.iconBg} />
                       </div>
                       <div>
-                        <div style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 900, fontSize: 18, color: s.iconBg, lineHeight: 1 }}>{s.num}</div>
+                        <div style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 900, fontSize: 18, color: s.iconBg, lineHeight: 1, display: "flex", alignItems: "center", gap: 2 }}>
+                          {s.num}{s.Icon === TrendingUp && <Star size={13} fill={s.iconBg} color={s.iconBg} />}
+                        </div>
                         <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>{s.label}</div>
                       </div>
                     </div>

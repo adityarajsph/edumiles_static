@@ -56,7 +56,7 @@ export default function CTA({ onOpenContact }: CTAProps) {
                 Explore Packages <ArrowRight size={17} />
               </button>
               <a
-                href="tel:+919955892640"
+                href="tel:+918796673667"
                 className="btn-outline"
                 style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
               >

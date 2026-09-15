@@ -371,7 +371,9 @@ export default function PackagesPage() {
               </div>
             ) : (
               <div style={{ textAlign: "center", padding: "80px 24px" }}>
-                <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+                  <Search size={48} color="#c7d2fe" strokeWidth={1.5} />
+                </div>
                 <h3 style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 700, color: "#0127FC", marginBottom: 8 }}>
                   No packages found
                 </h3>

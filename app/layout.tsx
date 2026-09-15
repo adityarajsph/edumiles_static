@@ -90,6 +90,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${poppins.variable} ${inter.variable}`}>
       <head>
+        {/* Trustpilot Domain Verification */}
+        <meta name="trustpilot-one-time-domain-verification-id" content="bd2e72b8-b010-499e-8996-cc8944352db6" />
         {/* Meta Pixel Code */}
         <script
           dangerouslySetInnerHTML={{

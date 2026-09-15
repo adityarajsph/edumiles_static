@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Phone, Mail, ArrowUpRight } from "lucide-react";
+import { MapPin, Phone, Mail, ArrowUpRight, Heart, Star } from "lucide-react";
 import { FaInstagram, FaFacebookF, FaYoutube } from "react-icons/fa";
 import Image from "next/image";
 import Link from "next/link";
@@ -128,7 +128,7 @@ export default function Footer() {
               {[
                 { num: "2000+", label: "Travellers" },
                 { num: "500+",  label: "Destinations" },
-                { num: "4.9★",  label: "Rating" },
+                { num: "4.9", label: "Rating", suffix: "star" },
               ].map((s, i) => (
                 <div key={s.label} style={{
                   flex: 1, padding: "14px 12px", textAlign: "center",
@@ -137,7 +137,11 @@ export default function Footer() {
                   <div style={{
                     fontFamily: "'Poppins',sans-serif", fontWeight: 800,
                     fontSize: 16, color: "#FE8100", lineHeight: 1,
-                  }}>{s.num}</div>
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 2,
+                  }}>
+                    {s.num}
+                    {"suffix" in s && s.suffix === "star" && <Star size={12} fill="#FE8100" color="#FE8100" />}
+                  </div>
                   <div style={{ fontSize: 10, color: "rgba(255,255,255,0.42)", marginTop: 4, letterSpacing: "0.04em" }}>
                     {s.label}
                   </div>
@@ -352,7 +356,7 @@ export default function Footer() {
         }}>
           © {new Date().getFullYear()}{" "}
           <span style={{ color: "rgba(255,255,255,0.5)", fontWeight: 600 }}>EdumilesTravels</span>
-          . All rights reserved. Made with ♥ in India.
+          . All rights reserved. Made with <Heart size={12} style={{ display: "inline", verticalAlign: "middle", color: "#FE8100" }} fill="#FE8100" /> in India.
         </p>
 
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
