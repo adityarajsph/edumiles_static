@@ -7,60 +7,57 @@ import {
 } from "lucide-react";
 import { useScrollAnimation } from "../hooks/useScrollAnimation";
 
-/* ─── Feature data ───────────────────────────────────────────── */
 const features = [
   {
     Icon: ShieldCheck,
     title: "Verified Hotels",
     desc: "Every property is personally inspected by our team for quality, safety and comfort before we recommend it.",
-    accent: "#0127FC",
-    light: "#eff6ff",
-    border: "#c7d2fe",
-    num: "01",
+    accent: "#0127FC", light: "#eff6ff", border: "#c7d2fe", num: "01",
   },
   {
     Icon: BadgeDollarSign,
     title: "Best Price Guarantee",
     desc: "We guarantee the lowest prices. Find it cheaper elsewhere and we will match it — no questions asked.",
-    accent: "#FE8100",
-    light: "#fff7ed",
-    border: "#fed7aa",
-    num: "02",
+    accent: "#FE8100", light: "#fff7ed", border: "#fed7aa", num: "02",
   },
   {
     Icon: Headphones,
     title: "24 × 7 Support",
     desc: "Our dedicated travel experts are available round the clock via chat, call and email — before and during your trip.",
-    accent: "#7c3aed",
-    light: "#f5f3ff",
-    border: "#ddd6fe",
-    num: "03",
+    accent: "#7c3aed", light: "#f5f3ff", border: "#ddd6fe", num: "03",
   },
   {
     Icon: Lock,
     title: "100% Safe Payments",
     desc: "Industry-standard encrypted gateways. Pay securely via cards, UPI, net banking or easy EMI options.",
-    accent: "#059669",
-    light: "#f0fdf4",
-    border: "#bbf7d0",
-    num: "04",
+    accent: "#059669", light: "#f0fdf4", border: "#bbf7d0", num: "04",
   },
   {
     Icon: LayoutList,
     title: "Custom Itineraries",
     desc: "Tell us your dream destination and budget — our experts will craft a bespoke, tailor-made itinerary just for you.",
-    accent: "#e11d48",
-    light: "#fff1f2",
-    border: "#fecdd3",
-    num: "05",
+    accent: "#e11d48", light: "#fff1f2", border: "#fecdd3", num: "05",
   },
 ];
 
-/* ─── Trust stats ────────────────────────────────────────────── */
 const stats = [
-  { Icon: Users, num: "50K+",  label: "Happy Travellers" },
-  { Icon: Star,  num: "4.9",   label: "Google Rating",   isStar: true },
-  { Icon: Award, num: "7+",    label: "Years Experience" },
+  { Icon: Users, num: "50K+", label: "Happy Travellers" },
+  { Icon: Star,  num: "4.9",  label: "Google Rating", isStar: true },
+  { Icon: Award, num: "7+",   label: "Years Experience" },
+];
+
+const highlights = [
+  "Personalised itinerary every time",
+  "No hidden fees — ever",
+  "Rated 4.9 on Google",
+];
+
+const bottomBand = [
+  { label: "500+",   sub: "Destinations"       },
+  { label: "100%",   sub: "Secure Booking"     },
+  { label: "15 Min", sub: "Response Time"      },
+  { label: "Zero",   sub: "Hidden Charges"     },
+  { label: "Free",   sub: "Itinerary Planning" },
 ];
 
 interface WhyChooseUsProps {
@@ -71,289 +68,334 @@ export default function WhyChooseUs({ onOpenContact }: WhyChooseUsProps) {
   const { ref, isVisible } = useScrollAnimation();
 
   return (
-    <section
-      style={{
-        padding: "100px 24px",
-        background: "#fff",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      {/* Decorative blobs */}
-      <div style={{ position: "absolute", top: -80, left: -80, width: 480, height: 480, borderRadius: "50%", background: "radial-gradient(circle,rgba(1,39,252,0.04) 0%,transparent 70%)", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", bottom: -60, right: -60, width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle,rgba(254,129,0,0.05) 0%,transparent 70%)", pointerEvents: "none" }} />
+    <section className="wcu-section">
+      <div className="wcu-blob wcu-blob--tl" aria-hidden />
+      <div className="wcu-blob wcu-blob--br" aria-hidden />
 
-      <div style={{ maxWidth: 1200, margin: "0 auto", position: "relative" }}>
+      <div className="wcu-container">
 
-        {/* ── Section header ── */}
+        {/* ── Header ── */}
         <div
           ref={ref}
-          style={{
-            textAlign: "center", marginBottom: 72,
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? "translateY(0)" : "translateY(28px)",
-            transition: "all 0.7s ease",
-          }}
+          className={`wcu-header ${isVisible ? "wcu-in" : ""}`}
         >
           <span className="section-tag">Our Promise</span>
           <h2 className="section-title">Why Choose Us</h2>
           <div className="section-divider" />
-          <p className="section-sub">
-            We go beyond booking. We craft memories that last a lifetime.
-          </p>
+          <p className="section-sub">We go beyond booking. We craft memories that last a lifetime.</p>
         </div>
 
         {/* ── Main two-column layout ── */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1.1fr",
-            gap: 56,
-            alignItems: "center",
-            marginBottom: 72,
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? "translateY(0)" : "translateY(32px)",
-            transition: "all 0.7s ease 0.1s",
-          }}
-        >
+        <div className={`wcu-body ${isVisible ? "wcu-in" : ""}`}>
+
           {/* Left — feature list */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div className="wcu-features">
             {features.map((f, i) => (
               <div
                 key={f.title}
+                className="wcu-row"
                 style={{
-                  display: "flex",
-                  gap: 18,
-                  padding: "20px 22px",
-                  borderRadius: 18,
-                  border: "1.5px solid transparent",
-                  background: "#fff",
-                  cursor: "default",
                   opacity: isVisible ? 1 : 0,
                   transform: isVisible ? "translateX(0)" : "translateX(-20px)",
-                  transition: `all 0.55s ease ${i * 90}ms`,
+                  transition: `opacity 0.55s ease ${i * 90}ms, transform 0.55s ease ${i * 90}ms`,
                 }}
-                className="wcu-row"
               >
-                {/* Icon bubble */}
                 <div
-                  style={{
-                    width: 52, height: 52,
-                    borderRadius: 16,
-                    background: f.light,
-                    border: `1.5px solid ${f.border}`,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    flexShrink: 0,
-                  }}
+                  className="wcu-row__icon"
+                  style={{ background: f.light, border: `1.5px solid ${f.border}` }}
                 >
                   <f.Icon size={22} color={f.accent} strokeWidth={2.2} />
                 </div>
-
-                {/* Text */}
-                <div style={{ minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontFamily: "'Poppins',sans-serif",
-                      fontWeight: 700, fontSize: 15,
-                      color: "#0f172a", marginBottom: 4,
-                    }}
-                  >
-                    {f.title}
-                  </div>
-                  <p style={{ color: "#64748b", fontSize: 13.5, lineHeight: 1.65, margin: 0 }}>
-                    {f.desc}
-                  </p>
+                <div className="wcu-row__text">
+                  <div className="wcu-row__title">{f.title}</div>
+                  <p className="wcu-row__desc">{f.desc}</p>
                 </div>
-
-                {/* Step number — right side */}
-                <div
-                  style={{
-                    fontFamily: "'Poppins',sans-serif",
-                    fontWeight: 900, fontSize: 11,
-                    color: f.accent,
-                    opacity: 0.35,
-                    alignSelf: "flex-start",
-                    flexShrink: 0,
-                    letterSpacing: "0.04em",
-                    marginTop: 2,
-                  }}
-                >
-                  {f.num}
-                </div>
+                <div className="wcu-row__num" style={{ color: f.accent }}>{f.num}</div>
               </div>
             ))}
           </div>
 
-          {/* Right — visual card stack */}
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: 20 }}
-          >
-            {/* Hero highlight card */}
-            <div
-              style={{
-                background: "linear-gradient(135deg,#0127FC 0%,#001060 100%)",
-                borderRadius: 28,
-                padding: "40px 36px",
-                position: "relative",
-                overflow: "hidden",
-                boxShadow: "0 20px 64px rgba(1,39,252,0.25)",
-              }}
-            >
-              {/* Decorative ring */}
-              <div style={{ position: "absolute", top: -48, right: -48, width: 200, height: 200, borderRadius: "50%", border: "40px solid rgba(254,129,0,0.12)", pointerEvents: "none" }} />
-              <div style={{ position: "absolute", bottom: -32, left: -32, width: 140, height: 140, borderRadius: "50%", background: "rgba(255,255,255,0.04)", pointerEvents: "none" }} />
+          {/* Right — visual cards */}
+          <div className="wcu-right">
 
-              <div
-                style={{
-                  fontFamily: "'Poppins',sans-serif",
-                  fontWeight: 900, fontSize: 56,
-                  color: "#fff", lineHeight: 1,
-                  marginBottom: 8,
-                  position: "relative",
-                }}
-              >
-                50K+
-              </div>
-              <div
-                style={{
-                  color: "rgba(255,255,255,0.6)",
-                  fontSize: 14, lineHeight: 1.7,
-                  marginBottom: 28, maxWidth: 300, position: "relative",
-                }}
-              >
+            {/* Hero card */}
+            <div className="wcu-hero-card">
+              <div className="wcu-hero-card__ring" aria-hidden />
+              <div className="wcu-hero-card__blob" aria-hidden />
+
+              <div className="wcu-hero-card__num">50K+</div>
+              <p className="wcu-hero-card__sub">
                 Happy travellers have trusted us for their most special journeys — and they keep coming back.
-              </div>
+              </p>
 
-              {/* Checklist */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative" }}>
-                {[
-                  "Personalised itinerary every time",
-                  "No hidden fees — ever",
-                  "Rated 4.9 on Google",
-                ].map((pt) => (
-                  <div key={pt} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div className="wcu-hero-card__checks">
+                {highlights.map((pt) => (
+                  <div key={pt} className="wcu-hero-card__check">
                     <CheckCircle size={16} color="#FE8100" fill="rgba(254,129,0,0.15)" />
-                    <span style={{ color: "rgba(255,255,255,0.82)", fontSize: 14, fontWeight: 500 }}>{pt}</span>
+                    <span>{pt}</span>
                   </div>
                 ))}
               </div>
 
-              {/* CTA */}
               <button
                 onClick={() => onOpenContact("Start Your Journey")}
-                className="btn-primary"
-                style={{
-                  marginTop: 28,
-                  display: "inline-flex",
-                  fontSize: 14,
-                  padding: "13px 28px",
-                  position: "relative",
-                }}
+                className="btn-primary wcu-hero-card__cta"
               >
                 Start Your Journey <ArrowRight size={16} />
               </button>
             </div>
 
             {/* Stats row */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3,1fr)",
-                gap: 12,
-              }}
-            >
+            <div className="wcu-stats">
               {stats.map(({ Icon, num, label, isStar }) => (
-                <div
-                  key={label}
-                  style={{
-                    background: "#fff",
-                    border: "1.5px solid #f1f5f9",
-                    borderRadius: 18,
-                    padding: "18px 14px",
-                    textAlign: "center",
-                    boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontFamily: "'Poppins',sans-serif",
-                      fontWeight: 900, fontSize: 22,
-                      color: "#0127FC",
-                      display: "flex", alignItems: "center",
-                      justifyContent: "center", gap: 2,
-                      lineHeight: 1,
-                    }}
-                  >
+                <div key={label} className="wcu-stat">
+                  <div className="wcu-stat__val">
                     {num}
                     {isStar && <Star size={14} fill="#FE8100" color="#FE8100" />}
                   </div>
-                  <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 5, fontWeight: 600, letterSpacing: "0.03em" }}>
-                    {label}
-                  </div>
+                  <div className="wcu-stat__lbl">{label}</div>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* ── Bottom feature band ── */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))",
-            gap: 0,
-            background: "linear-gradient(135deg,#f8faff,#fff7ed)",
-            borderRadius: 24,
-            border: "1.5px solid #e2e8f0",
-            overflow: "hidden",
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? "translateY(0)" : "translateY(20px)",
-            transition: "all 0.7s ease 0.4s",
-          }}
-        >
-          {[
-            { label: "500+",   sub: "Destinations"       },
-            { label: "100%",   sub: "Secure Booking"     },
-            { label: "15 Min", sub: "Response Time"      },
-            { label: "Zero",   sub: "Hidden Charges"     },
-            { label: "Free",   sub: "Itinerary Planning" },
-          ].map((item, i, arr) => (
-            <div
-              key={item.label}
-              style={{
-                padding: "24px 20px",
-                textAlign: "center",
-                borderRight: i < arr.length - 1 ? "1.5px solid #e2e8f0" : "none",
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: "'Poppins',sans-serif",
-                  fontWeight: 900, fontSize: 22,
-                  background: "linear-gradient(135deg,#0127FC,#FE8100)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  lineHeight: 1, marginBottom: 6,
-                }}
-              >
-                {item.label}
-              </div>
-              <div style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>
-                {item.sub}
-              </div>
+        {/* ── Bottom band ── */}
+        <div className={`wcu-band ${isVisible ? "wcu-in wcu-in--delayed" : ""}`}>
+          {bottomBand.map((item, i) => (
+            <div key={item.label} className="wcu-band__cell" style={{ borderRight: i < bottomBand.length - 1 ? "1.5px solid #e2e8f0" : "none" }}>
+              <div className="wcu-band__val">{item.label}</div>
+              <div className="wcu-band__sub">{item.sub}</div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* ── Row hover styles ── */}
       <style>{`
+        /* ── section ── */
+        .wcu-section {
+          padding: 100px 24px;
+          background: #fff;
+          position: relative;
+          overflow: hidden;
+        }
+        .wcu-blob {
+          position: absolute;
+          border-radius: 50%;
+          pointer-events: none;
+        }
+        .wcu-blob--tl {
+          top: -80px; left: -80px;
+          width: 480px; height: 480px;
+          background: radial-gradient(circle, rgba(1,39,252,0.04) 0%, transparent 70%);
+        }
+        .wcu-blob--br {
+          bottom: -60px; right: -60px;
+          width: 400px; height: 400px;
+          background: radial-gradient(circle, rgba(254,129,0,0.05) 0%, transparent 70%);
+        }
+
+        /* ── container ── */
+        .wcu-container {
+          max-width: 1200px;
+          margin: 0 auto;
+          position: relative;
+        }
+
+        /* ── header ── */
+        .wcu-header {
+          text-align: center;
+          margin-bottom: 64px;
+          opacity: 0;
+          transform: translateY(24px);
+          transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .wcu-header.wcu-in { opacity: 1; transform: translateY(0); }
+
+        /* ── body grid ── */
+        .wcu-body {
+          display: grid;
+          grid-template-columns: 1fr 1.05fr;
+          gap: 48px;
+          align-items: start;
+          margin-bottom: 64px;
+          opacity: 0;
+          transform: translateY(28px);
+          transition: opacity 0.7s ease 0.1s, transform 0.7s ease 0.1s;
+        }
+        .wcu-body.wcu-in { opacity: 1; transform: translateY(0); }
+
+        /* ── feature rows ── */
+        .wcu-features { display: flex; flex-direction: column; gap: 4px; }
+        .wcu-row {
+          display: flex;
+          gap: 16px;
+          padding: 18px 20px;
+          border-radius: 16px;
+          border: 1.5px solid transparent;
+          background: #fff;
+          cursor: default;
+          transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+        }
         .wcu-row:hover {
-          background: #f8faff !important;
-          border-color: #c7d2fe !important;
-          transform: translateX(4px) !important;
-          box-shadow: 0 4px 20px rgba(1,39,252,0.08) !important;
+          background: #f8faff;
+          border-color: #c7d2fe;
+          transform: translateX(4px);
+          box-shadow: 0 4px 20px rgba(1,39,252,0.08);
+        }
+        .wcu-row__icon {
+          width: 50px; height: 50px;
+          border-radius: 15px;
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
+        }
+        .wcu-row__text { flex: 1; min-width: 0; }
+        .wcu-row__title {
+          font-family: 'Poppins', sans-serif;
+          font-weight: 700; font-size: 15px;
+          color: #0f172a; margin-bottom: 4px;
+        }
+        .wcu-row__desc { color: #64748b; font-size: 13.5px; line-height: 1.65; margin: 0; }
+        .wcu-row__num {
+          font-family: 'Poppins', sans-serif;
+          font-weight: 900; font-size: 11px;
+          opacity: 0.35; align-self: flex-start;
+          flex-shrink: 0; letter-spacing: 0.04em; margin-top: 2px;
+        }
+
+        /* ── right panel ── */
+        .wcu-right { display: flex; flex-direction: column; gap: 16px; }
+
+        /* hero card */
+        .wcu-hero-card {
+          background: linear-gradient(135deg, #0127FC 0%, #001060 100%);
+          border-radius: 26px;
+          padding: 36px 32px;
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 20px 64px rgba(1,39,252,0.25);
+        }
+        .wcu-hero-card__ring {
+          position: absolute; top: -48px; right: -48px;
+          width: 200px; height: 200px; border-radius: 50%;
+          border: 40px solid rgba(254,129,0,0.12);
+          pointer-events: none;
+        }
+        .wcu-hero-card__blob {
+          position: absolute; bottom: -32px; left: -32px;
+          width: 140px; height: 140px; border-radius: 50%;
+          background: rgba(255,255,255,0.04); pointer-events: none;
+        }
+        .wcu-hero-card__num {
+          font-family: 'Poppins', sans-serif;
+          font-weight: 900; font-size: 52px;
+          color: #fff; line-height: 1; margin-bottom: 8px;
+          position: relative;
+        }
+        .wcu-hero-card__sub {
+          color: rgba(255,255,255,0.6);
+          font-size: 14px; line-height: 1.7;
+          margin-bottom: 24px; max-width: 300px;
+          position: relative;
+        }
+        .wcu-hero-card__checks {
+          display: flex; flex-direction: column; gap: 10px;
+          position: relative; margin-bottom: 28px;
+        }
+        .wcu-hero-card__check {
+          display: flex; align-items: center; gap: 10px;
+        }
+        .wcu-hero-card__check span {
+          color: rgba(255,255,255,0.82); font-size: 14px; font-weight: 500;
+        }
+        .wcu-hero-card__cta {
+          font-size: 14px !important;
+          padding: 13px 26px !important;
+          position: relative;
+        }
+
+        /* stats row */
+        .wcu-stats {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          border: 1.5px solid #f1f5f9;
+          border-radius: 18px;
+          overflow: hidden;
+          background: #fff;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+        .wcu-stat {
+          padding: 18px 12px;
+          text-align: center;
+          border-right: 1.5px solid #f1f5f9;
+        }
+        .wcu-stat:last-child { border-right: none; }
+        .wcu-stat__val {
+          font-family: 'Poppins', sans-serif;
+          font-weight: 900; font-size: 22px;
+          color: #0127FC;
+          display: flex; align-items: center;
+          justify-content: center; gap: 3px;
+          line-height: 1;
+        }
+        .wcu-stat__lbl { font-size: 11px; color: #94a3b8; margin-top: 5px; font-weight: 600; }
+
+        /* ── bottom band ── */
+        .wcu-band {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          background: linear-gradient(135deg, #f8faff, #fff7ed);
+          border-radius: 22px;
+          border: 1.5px solid #e2e8f0;
+          overflow: hidden;
+          opacity: 0;
+          transform: translateY(20px);
+          transition: opacity 0.7s ease 0.4s, transform 0.7s ease 0.4s;
+        }
+        .wcu-band.wcu-in { opacity: 1; transform: translateY(0); }
+        .wcu-band__cell { padding: 22px 16px; text-align: center; }
+        .wcu-band__val {
+          font-family: 'Poppins', sans-serif;
+          font-weight: 900; font-size: 21px;
+          background: linear-gradient(135deg, #0127FC, #FE8100);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          line-height: 1; margin-bottom: 5px;
+        }
+        .wcu-band__sub { font-size: 12px; color: #64748b; font-weight: 600; }
+
+        /* ── MOBILE ── */
+        @media (max-width: 900px) {
+          .wcu-body {
+            grid-template-columns: 1fr;
+            gap: 32px;
+          }
+          .wcu-band {
+            grid-template-columns: repeat(3, 1fr);
+          }
+          .wcu-band__cell:nth-child(3) { border-right: none !important; }
+          .wcu-band__cell:nth-child(4),
+          .wcu-band__cell:nth-child(5) {
+            border-top: 1.5px solid #e2e8f0;
+          }
+          .wcu-band__cell:nth-child(5) { border-right: none !important; }
+        }
+        @media (max-width: 600px) {
+          .wcu-section { padding: 72px 16px; }
+          .wcu-header { margin-bottom: 40px; }
+          .wcu-body { margin-bottom: 40px; }
+          .wcu-row { padding: 14px 16px; gap: 12px; }
+          .wcu-row__icon { width: 44px; height: 44px; border-radius: 12px; }
+          .wcu-row__num { display: none; }
+          .wcu-hero-card { padding: 28px 22px; }
+          .wcu-hero-card__num { font-size: 42px; }
+          .wcu-stats { grid-template-columns: repeat(3, 1fr); }
+          .wcu-band { grid-template-columns: repeat(2, 1fr); }
+          .wcu-band__cell:nth-child(2) { border-right: none !important; }
+          .wcu-band__cell:nth-child(3) { border-right: 1.5px solid #e2e8f0 !important; border-top: 1.5px solid #e2e8f0; }
+          .wcu-band__cell:nth-child(4) { border-top: 1.5px solid #e2e8f0; }
+          .wcu-band__cell:nth-child(5) { border-top: 1.5px solid #e2e8f0; border-right: none !important; }
         }
       `}</style>
     </section>
