@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 import {
   X, Bus, MapPin, Calendar, Users, User, Mail, Phone,
   ChevronDown, Send, CheckCircle, Loader2, UserCheck, Baby,
@@ -38,7 +39,7 @@ const CITIES = [
 
 const BUS_TYPES = ["Any", "AC Sleeper", "Non-AC Sleeper", "AC Semi-Sleeper", "AC Seater", "Non-AC Seater", "Volvo AC", "Luxury / Multi-Axle"];
 
-const WEB3FORMS_KEY = "c8845256-7de7-475d-a9ec-4f5a046fec6d";
+const WEB3FORMS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_KEY ?? "";
 
 interface BusEnquiryModalProps {
   open: boolean;
@@ -234,29 +235,56 @@ export default function BusEnquiryModal({ open, onClose }: BusEnquiryModalProps)
     if (!validateStep2()) return;
     setSending(true); setApiError("");
 
-    const body = {
+    const payload = {
       access_key: WEB3FORMS_KEY,
-      subject: `Bus Enquiry: ${from} → ${to}`,
-      name, email, phone,
+      subject: `Bus Enquiry: ${from} to ${to}`,
+      from_name: "EdumilesTravels Website",
+      name,
+      email,
+      phone,
       from_city: from,
       to_city: to,
       trip_type: tripType,
       travel_date: travelDate,
-      return_date: tripType === "round-trip" ? returnDate : "N/A",
+      return_date: tripType === "round-trip" ? returnDate : "One Way",
       bus_type: busType,
-      adults, children,
-      total_passengers: totalPassengers,
-      message: message || "—",
+      passengers: `${adults} adult${adults !== 1 ? "s" : ""}${children > 0 ? `, ${children} child${children !== 1 ? "ren" : ""}` : ""}`,
+      message: message || "No additional notes",
+      botcheck: "",
     };
 
     try {
-      const res = await fetch("https://api.web3forms.com/submit", {
+      const res = await fetchWithTimeout("https://api.web3forms.com/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (data.success) setDone(true);
+      if (data.success) {
+        setDone(true);
+        // Fire-and-forget DB save — never blocks or breaks the form
+        fetch("/api/forms/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: AbortSignal.timeout(5000),
+          body: JSON.stringify({
+            formName: "Bus Enquiry",
+            formSlug: "bus-enquiry",
+            data: {
+              name, email, phone,
+              from_city:   from,
+              to_city:     to,
+              trip_type:   tripType,
+              travel_date: travelDate,
+              return_date: tripType === "round-trip" ? returnDate : "",
+              bus_type:    busType,
+              adults, children,
+              message: message || "",
+            },
+            sourcePage: typeof window !== "undefined" ? window.location.pathname : "",
+          }),
+        }).catch(() => {});
+      }
       else setApiError(data.message || "Submission failed. Please try again.");
     } catch {
       setApiError("Network error. Please try again.");

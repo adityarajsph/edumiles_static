@@ -1,118 +1,18 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import ContactModal from "../components/ContactModal";
 import {
   Star, Clock, Users, MapPin, ArrowRight, Search, Filter, X,
 } from "lucide-react";
+import Link from "next/link";
 import { useScrollAnimation } from "../hooks/useScrollAnimation";
+import { ALL_PACKAGES } from "../lib/packages";
+import type { Package } from "../lib/packages";
 
-/* ─── Data ─────────────────────────────────────────── */
-const ALL_PACKAGES = [
-  {
-    id: 1, name: "Golden Triangle Tour",
-    location: "Delhi • Agra • Jaipur",
-    image: "https://images.unsplash.com/photo-1564507592333-c60657eea523?w=700&q=80",
-    price: 12999, originalPrice: 18999,
-    rating: 4.9, reviews: 312,
-    duration: "6 Days / 5 Nights", groupSize: "2–12",
-    badge: "Best Seller", badgeBg: "#FE8100",
-    category: "Heritage",
-    highlights: ["Taj Mahal Sunrise", "Amber Fort", "City Palace"],
-  },
-  {
-    id: 2, name: "Kerala Backwaters Bliss",
-    location: "Kochi • Alleppey • Munnar",
-    image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=700&q=80",
-    price: 15999, originalPrice: 22999,
-    rating: 4.8, reviews: 248,
-    duration: "7 Days / 6 Nights", groupSize: "2–8",
-    badge: "Premium", badgeBg: "#0127FC",
-    category: "Luxury",
-    highlights: ["Houseboat Stay", "Spice Plantation", "Kathakali Show"],
-  },
-  {
-    id: 3, name: "Himachal Adventure",
-    location: "Manali • Solang • Rohtang",
-    image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=700&q=80",
-    price: 9999, originalPrice: 14999,
-    rating: 4.7, reviews: 187,
-    duration: "5 Days / 4 Nights", groupSize: "4–15",
-    badge: "Adventure", badgeBg: "#10b981",
-    category: "Adventure",
-    highlights: ["Paragliding", "Snow Activities", "Hadimba Temple"],
-  },
-  {
-    id: 4, name: "Goa Beach Escape",
-    location: "North Goa • South Goa",
-    image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=700&q=80",
-    price: 8499, originalPrice: 12999,
-    rating: 4.6, reviews: 421,
-    duration: "4 Days / 3 Nights", groupSize: "2–20",
-    badge: "Popular", badgeBg: "#FE8100",
-    category: "Weekend Trips",
-    highlights: ["Beach Shacks", "Water Sports", "Dudhsagar Falls"],
-  },
-  {
-    id: 5, name: "Rajasthan Royal Journey",
-    location: "Jodhpur • Jaisalmer • Udaipur",
-    image: "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=700&q=80",
-    price: 19999, originalPrice: 28999,
-    rating: 4.9, reviews: 165,
-    duration: "8 Days / 7 Nights", groupSize: "2–10",
-    badge: "Luxury", badgeBg: "#a855f7",
-    category: "Luxury",
-    highlights: ["Desert Safari", "Palace Hotels", "Mehrangarh Fort"],
-  },
-  {
-    id: 6, name: "Char Dham Yatra",
-    location: "Badrinath • Kedarnath • Gangotri • Yamunotri",
-    image: "https://images.unsplash.com/photo-1609766857413-0f0d3c6e1b3a?w=700&q=80",
-    price: 24999, originalPrice: 34999,
-    rating: 4.9, reviews: 209,
-    duration: "12 Days / 11 Nights", groupSize: "4–20",
-    badge: "Religious", badgeBg: "#f97316",
-    category: "Religious",
-    highlights: ["Kedarnath Darshan", "Badrinath Temple", "Gangotri Aarti"],
-  },
-  {
-    id: 7, name: "Andaman Island Retreat",
-    location: "Port Blair • Havelock • Neil Island",
-    image: "https://images.unsplash.com/photo-1559494007-9f5847c49d94?w=700&q=80",
-    price: 21999, originalPrice: 31999,
-    rating: 4.8, reviews: 134,
-    duration: "6 Days / 5 Nights", groupSize: "2–8",
-    badge: "Premium", badgeBg: "#0127FC",
-    category: "Luxury",
-    highlights: ["Scuba Diving", "Radhanagar Beach", "Cellular Jail"],
-  },
-  {
-    id: 8, name: "Honeymoon in Kashmir",
-    location: "Srinagar • Gulmarg • Pahalgam",
-    image: "https://images.unsplash.com/photo-1587474260584-136574528ed5?w=700&q=80",
-    price: 17999, originalPrice: 25999,
-    rating: 4.9, reviews: 298,
-    duration: "7 Days / 6 Nights", groupSize: "2",
-    badge: "Honeymoon", badgeBg: "#e11d48",
-    category: "Honeymoon",
-    highlights: ["Shikara Ride", "Gondola Cable Car", "Dal Lake"],
-  },
-  {
-    id: 9, name: "Spiti Valley Expedition",
-    location: "Shimla • Kaza • Chandratal",
-    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=700&q=80",
-    price: 13499, originalPrice: 19499,
-    rating: 4.7, reviews: 92,
-    duration: "9 Days / 8 Nights", groupSize: "4–15",
-    badge: "Adventure", badgeBg: "#10b981",
-    category: "Adventure",
-    highlights: ["Key Monastery", "Chandratal Lake", "Himalayan Villages"],
-  },
-];
-
-const CATEGORIES = ["All", "Adventure", "Honeymoon", "Luxury", "Heritage", "Religious", "Weekend Trips"];
+const STATIC_CATEGORIES = ["All", "Adventure", "Honeymoon", "Luxury", "Heritage", "Religious", "Weekend Trips"];
 const SORT_OPTIONS = ["Recommended", "Price: Low to High", "Price: High to Low", "Top Rated"];
 
 /* ─── Sub-components ────────────────────────────────── */
@@ -122,7 +22,7 @@ function PackageCard({
   visible,
   onBook,
 }: {
-  pkg: typeof ALL_PACKAGES[0];
+  pkg: Package;
   delay: number;
   visible: boolean;
   onBook: (subject: string) => void;
@@ -203,6 +103,31 @@ function PackageCard({
             Book Now <ArrowRight size={14} />
           </button>
         </div>
+
+        {/* View Details */}
+        <div style={{ padding: "12px 24px 20px" }}>
+          <Link
+            href={`/packages/${pkg.slug}`}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+              width: "100%", padding: "10px 0", borderRadius: 14,
+              border: "1.5px solid #0127FC", color: "#0127FC",
+              fontFamily: "'Poppins',sans-serif", fontWeight: 700, fontSize: 13,
+              textDecoration: "none", transition: "all 0.25s ease",
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLAnchorElement).style.background = "#0127FC";
+              (e.currentTarget as HTMLAnchorElement).style.color = "#fff";
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLAnchorElement).style.background = "transparent";
+              (e.currentTarget as HTMLAnchorElement).style.color = "#0127FC";
+            }}
+            aria-label={`View details for ${pkg.name}`}
+          >
+            View Details <ArrowRight size={14} style={{ transition: "transform 0.25s ease" }} />
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -215,14 +140,68 @@ export default function PackagesPage() {
   const [sort, setSort]           = useState("Recommended");
   const [modalOpen, setModalOpen] = useState(false);
   const [modalSubject, setModalSubject] = useState<string | undefined>();
+  // Start with static data so the page renders instantly with no flash.
+  // When the DB responds, swap in the live data.
+  const [packages, setPackages]   = useState<Package[]>(ALL_PACKAGES);
+  const [categories, setCategories] = useState<string[]>(STATIC_CATEGORIES);
   const { ref, isVisible }        = useScrollAnimation();
+
+  // Silently fetch published packages from the CMS on mount.
+  // Falls back to static data on any error — live site never breaks.
+  useEffect(() => {
+    fetch("/api/packages?status=published&limit=100")
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && d.data.items.length > 0) {
+          // Map CMS fields to the shape the card component expects
+          const mapped: Package[] = d.data.items.map((p: Record<string, unknown>) => ({
+            id:            p._id as string,
+            name:          (p.title as string) || "",
+            slug:          p.slug as string,
+            location:      (p.destination as string) || "",
+            image:         (p.featuredImage as string) || "",
+            images:        (p.gallery as string[]) || [],
+            price:         (p.price as number) || 0,
+            originalPrice: (p.discountPrice as number) > 0 ? (p.discountPrice as number) : ((p.price as number) || 0),
+            rating:        (p.rating as number) || 0,
+            reviews:       (p.reviews as number) || 0,
+            duration:      (p.duration as string) || "",
+            groupSize:     (p.groupSize as string) || "",
+            badge:         (p.badge as string) || "",
+            badgeBg:       (p.badgeBg as string) || "#FE8100",
+            category:      (p.category as string) || "",
+            highlights:    (p.highlights as string[]) || [],
+            description:   (p.shortDescription as string) || "",
+            inclusions:    (p.inclusions as string[]) || [],
+            exclusions:    (p.exclusions as string[]) || [],
+            season:        (p.season as Package["season"]) || { peak: { months: "", note: "" }, offSeason: { months: "", note: "" }, priceTendency: "", activeSeason: "peak" as const },
+            faq:           ((p.faqs as Array<{ question: string; answer: string }>) || []).map(f => ({ q: f.question, a: f.answer })),
+            featured:      (p.isFeatured as boolean) || false,
+          }));
+          setPackages(mapped);
+        }
+      })
+      .catch(() => { /* silently keep static fallback */ });
+  }, []);
+
+  // Fetch live categories, fall back to static list on any error
+  useEffect(() => {
+    fetch("/api/categories")
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && d.data.length > 0) {
+          setCategories(["All", ...d.data.map((c: { name: string }) => c.name)]);
+        }
+      })
+      .catch(() => { /* keep static fallback */ });
+  }, []);
 
   const openContact = useCallback((subject?: string) => {
     setModalSubject(subject);
     setModalOpen(true);
   }, []);
 
-  const filtered = ALL_PACKAGES
+  const filtered = packages
     .filter(p =>
       (category === "All" || p.category === category) &&
       (search === "" ||
@@ -312,7 +291,7 @@ export default function PackagesPage() {
               {/* Category pills */}
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
                 <Filter size={15} color="#64748b" />
-                {CATEGORIES.map(cat => (
+                {categories.map(cat => (
                   <button
                     key={cat}
                     onClick={() => setCategory(cat)}

@@ -3,7 +3,6 @@
 import { useState, useCallback } from "react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
-import PackageSearch from "./components/PackageSearch";
 import PopularDestinations from "./components/PopularDestinations";
 import FeaturedPackages from "./components/FeaturedPackages";
 import TicketBooking from "./components/TicketBooking";
@@ -35,7 +34,6 @@ export default function Home() {
     <main>
       <Navbar />
       <Hero onOpenContact={openContact} onOpenEnquiry={openEnquiry} />
-      <PackageSearch onOpenContact={openContact} />
       <PopularDestinations />
       <FeaturedPackages onOpenContact={openContact} />
       <TicketBooking onOpenContact={openContact} onOpenEnquiry={openEnquiry} onOpenBusEnquiry={openBusEnquiry} />

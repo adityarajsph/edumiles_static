@@ -1,337 +1,18 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 import {
   X, PlaneTakeoff, PlaneLanding, Calendar, Users,
   User, Mail, Phone, ChevronDown, Send, CheckCircle,
-  Loader2, Baby, UserCheck, Plane, MapPin,
+  Loader2, Baby, UserCheck, Plane,
 } from "lucide-react";
+import AirportCombobox, { type Airport } from "@/app/components/AirportCombobox";
 
-/* ─── Airport list ───────────────────────────────────────────── */
-const AIRPORTS = [
-  // ── India ──
-  { code: "DEL", name: "Indira Gandhi International",               city: "New Delhi",          country: "India" },
-  { code: "BOM", name: "Chhatrapati Shivaji Maharaj International", city: "Mumbai",              country: "India" },
-  { code: "BLR", name: "Kempegowda International",                  city: "Bengaluru",           country: "India" },
-  { code: "MAA", name: "Chennai International",                     city: "Chennai",             country: "India" },
-  { code: "CCU", name: "Netaji Subhas Chandra Bose International",  city: "Kolkata",             country: "India" },
-  { code: "HYD", name: "Rajiv Gandhi International",                city: "Hyderabad",           country: "India" },
-  { code: "AMD", name: "Sardar Vallabhbhai Patel International",    city: "Ahmedabad",           country: "India" },
-  { code: "PNQ", name: "Pune Airport",                              city: "Pune",                country: "India" },
-  { code: "COK", name: "Cochin International",                      city: "Kochi",               country: "India" },
-  { code: "JAI", name: "Jaipur International",                      city: "Jaipur",              country: "India" },
-  { code: "GOI", name: "Goa International (Dabolim)",               city: "Goa",                 country: "India" },
-  { code: "IXC", name: "Chandigarh International",                  city: "Chandigarh",          country: "India" },
-  { code: "LKO", name: "Chaudhary Charan Singh International",      city: "Lucknow",             country: "India" },
-  { code: "PAT", name: "Jay Prakash Narayan International",         city: "Patna",               country: "India" },
-  { code: "BHO", name: "Raja Bhoj Airport",                         city: "Bhopal",              country: "India" },
-  { code: "NAG", name: "Dr. Babasaheb Ambedkar International",      city: "Nagpur",              country: "India" },
-  { code: "SXR", name: "Sheikh ul Alam International",              city: "Srinagar",            country: "India" },
-  { code: "IXB", name: "Bagdogra Airport",                          city: "Siliguri",            country: "India" },
-  { code: "TRV", name: "Trivandrum International",                  city: "Thiruvananthapuram",  country: "India" },
-  { code: "VTZ", name: "Visakhapatnam Airport",                     city: "Visakhapatnam",       country: "India" },
-  { code: "IXZ", name: "Veer Savarkar International",               city: "Port Blair",          country: "India" },
-  { code: "GAU", name: "Lokpriya Gopinath Bordoloi International",  city: "Guwahati",            country: "India" },
-  { code: "IXR", name: "Birsa Munda Airport",                       city: "Ranchi",              country: "India" },
-  { code: "BBI", name: "Biju Patnaik International",                city: "Bhubaneswar",         country: "India" },
-  { code: "VNS", name: "Lal Bahadur Shastri International",         city: "Varanasi",            country: "India" },
-  { code: "ATQ", name: "Sri Guru Ram Dass Jee International",       city: "Amritsar",            country: "India" },
-  { code: "UDR", name: "Maharana Pratap Airport",                   city: "Udaipur",             country: "India" },
-  { code: "JDH", name: "Jodhpur Airport",                           city: "Jodhpur",             country: "India" },
-  { code: "IXJ", name: "Jammu Airport",                             city: "Jammu",               country: "India" },
-  { code: "DED", name: "Jolly Grant Airport",                       city: "Dehradun",            country: "India" },
-  { code: "KUU", name: "Kullu Manali Airport",                      city: "Kullu",               country: "India" },
-  { code: "IXL", name: "Kushok Bakula Rimpochhe Airport",           city: "Leh",                 country: "India" },
-  { code: "SHL", name: "Shillong Airport",                          city: "Shillong",            country: "India" },
-  { code: "IMF", name: "Imphal International",                      city: "Imphal",              country: "India" },
-  { code: "AGX", name: "Agatti Aerodrome",                          city: "Lakshadweep",         country: "India" },
-  { code: "HBX", name: "Hubli Airport",                             city: "Hubli",               country: "India" },
-  { code: "IXE", name: "Mangalore International",                   city: "Mangalore",           country: "India" },
-  { code: "CJB", name: "Coimbatore International",                  city: "Coimbatore",          country: "India" },
-  { code: "TIR", name: "Tirupati Airport",                          city: "Tirupati",            country: "India" },
-  { code: "MDU", name: "Madurai Airport",                           city: "Madurai",             country: "India" },
-  { code: "IXM", name: "Madurai Airport",                           city: "Madurai",             country: "India" },
-  { code: "TRZ", name: "Tiruchirappalli International",             city: "Tiruchirappalli",     country: "India" },
-  { code: "RPR", name: "Swami Vivekananda Airport",                 city: "Raipur",              country: "India" },
-  { code: "JLR", name: "Jabalpur Airport",                          city: "Jabalpur",            country: "India" },
-  { code: "IDR", name: "Devi Ahilyabai Holkar Airport",             city: "Indore",              country: "India" },
-  { code: "KNU", name: "Kanpur Airport",                            city: "Kanpur",              country: "India" },
-  { code: "AGR", name: "Agra Airport",                              city: "Agra",                country: "India" },
-  // ── UAE ──
-  { code: "DXB", name: "Dubai International",                       city: "Dubai",               country: "UAE" },
-  { code: "AUH", name: "Abu Dhabi International",                   city: "Abu Dhabi",           country: "UAE" },
-  { code: "SHJ", name: "Sharjah International",                     city: "Sharjah",             country: "UAE" },
-  // ── South Asia / SE Asia ──
-  { code: "SIN", name: "Changi International",                      city: "Singapore",           country: "Singapore" },
-  { code: "KUL", name: "Kuala Lumpur International",                city: "Kuala Lumpur",        country: "Malaysia" },
-  { code: "BKK", name: "Suvarnabhumi International",                city: "Bangkok",             country: "Thailand" },
-  { code: "DMK", name: "Don Mueang International",                  city: "Bangkok",             country: "Thailand" },
-  { code: "HKT", name: "Phuket International",                      city: "Phuket",              country: "Thailand" },
-  { code: "CNX", name: "Chiang Mai International",                  city: "Chiang Mai",          country: "Thailand" },
-  { code: "CMB", name: "Bandaranaike International",                city: "Colombo",             country: "Sri Lanka" },
-  { code: "KTM", name: "Tribhuvan International",                   city: "Kathmandu",           country: "Nepal" },
-  { code: "DAC", name: "Hazrat Shahjalal International",            city: "Dhaka",               country: "Bangladesh" },
-  { code: "MLE", name: "Velana International",                      city: "Malé",                country: "Maldives" },
-  { code: "RGN", name: "Yangon International",                      city: "Yangon",              country: "Myanmar" },
-  { code: "REP", name: "Siem Reap International",                   city: "Siem Reap",           country: "Cambodia" },
-  { code: "HAN", name: "Noi Bai International",                     city: "Hanoi",               country: "Vietnam" },
-  { code: "SGN", name: "Tan Son Nhat International",                city: "Ho Chi Minh City",    country: "Vietnam" },
-  { code: "DPS", name: "Ngurah Rai International",                  city: "Bali",                country: "Indonesia" },
-  { code: "CGK", name: "Soekarno–Hatta International",              city: "Jakarta",             country: "Indonesia" },
-  { code: "MNL", name: "Ninoy Aquino International",                city: "Manila",              country: "Philippines" },
-  { code: "CEB", name: "Mactan–Cebu International",                 city: "Cebu",                country: "Philippines" },
-  // ── Middle East ──
-  { code: "DOH", name: "Hamad International",                       city: "Doha",                country: "Qatar" },
-  { code: "BAH", name: "Bahrain International",                     city: "Manama",              country: "Bahrain" },
-  { code: "MCT", name: "Muscat International",                      city: "Muscat",              country: "Oman" },
-  { code: "RUH", name: "King Khalid International",                 city: "Riyadh",              country: "Saudi Arabia" },
-  { code: "JED", name: "King Abdulaziz International",              city: "Jeddah",              country: "Saudi Arabia" },
-  { code: "MED", name: "Prince Mohammad Bin Abdulaziz International", city: "Madinah",           country: "Saudi Arabia" },
-  { code: "TLV", name: "Ben Gurion International",                  city: "Tel Aviv",            country: "Israel" },
-  { code: "AMM", name: "Queen Alia International",                  city: "Amman",               country: "Jordan" },
-  { code: "BEY", name: "Rafic Hariri International",                city: "Beirut",              country: "Lebanon" },
-  // ── Africa ──
-  { code: "MUS", name: "Sir Seewoosagur Ramgoolam International",   city: "Mauritius",           country: "Mauritius" },
-  { code: "NBO", name: "Jomo Kenyatta International",               city: "Nairobi",             country: "Kenya" },
-  { code: "CPT", name: "Cape Town International",                   city: "Cape Town",           country: "South Africa" },
-  { code: "JNB", name: "O.R. Tambo International",                  city: "Johannesburg",        country: "South Africa" },
-  { code: "CAI", name: "Cairo International",                       city: "Cairo",               country: "Egypt" },
-  { code: "HRE", name: "Robert Gabriel Mugabe International",       city: "Harare",              country: "Zimbabwe" },
-  { code: "ADD", name: "Bole International",                        city: "Addis Ababa",         country: "Ethiopia" },
-  // ── Europe ──
-  { code: "LHR", name: "Heathrow Airport",                          city: "London",              country: "UK" },
-  { code: "LGW", name: "Gatwick Airport",                           city: "London",              country: "UK" },
-  { code: "MAN", name: "Manchester Airport",                        city: "Manchester",          country: "UK" },
-  { code: "CDG", name: "Charles de Gaulle International",           city: "Paris",               country: "France" },
-  { code: "ORY", name: "Paris Orly Airport",                        city: "Paris",               country: "France" },
-  { code: "NCE", name: "Nice Côte d'Azur International",            city: "Nice",                country: "France" },
-  { code: "FRA", name: "Frankfurt Airport",                         city: "Frankfurt",           country: "Germany" },
-  { code: "MUC", name: "Munich Airport",                            city: "Munich",              country: "Germany" },
-  { code: "BER", name: "Berlin Brandenburg Airport",                city: "Berlin",              country: "Germany" },
-  { code: "AMS", name: "Amsterdam Schiphol",                        city: "Amsterdam",           country: "Netherlands" },
-  { code: "ZRH", name: "Zurich Airport",                            city: "Zurich",              country: "Switzerland" },
-  { code: "GVA", name: "Geneva Airport",                            city: "Geneva",              country: "Switzerland" },
-  { code: "BCN", name: "Barcelona–El Prat Airport",                 city: "Barcelona",           country: "Spain" },
-  { code: "MAD", name: "Adolfo Suárez Madrid–Barajas",              city: "Madrid",              country: "Spain" },
-  { code: "FCO", name: "Leonardo da Vinci International (Fiumicino)", city: "Rome",              country: "Italy" },
-  { code: "MXP", name: "Milan Malpensa International",              city: "Milan",               country: "Italy" },
-  { code: "VCE", name: "Venice Marco Polo Airport",                 city: "Venice",              country: "Italy" },
-  { code: "ATH", name: "Athens International (Eleftherios Venizelos)", city: "Athens",           country: "Greece" },
-  { code: "HER", name: "Heraklion International",                   city: "Crete",               country: "Greece" },
-  { code: "IST", name: "Istanbul Airport",                          city: "Istanbul",            country: "Turkey" },
-  { code: "SAW", name: "Istanbul Sabiha Gökçen International",      city: "Istanbul",            country: "Turkey" },
-  { code: "PRG", name: "Václav Havel Airport Prague",               city: "Prague",              country: "Czech Republic" },
-  { code: "VIE", name: "Vienna International Airport",              city: "Vienna",              country: "Austria" },
-  { code: "BUD", name: "Budapest Ferenc Liszt International",        city: "Budapest",            country: "Hungary" },
-  { code: "WAW", name: "Warsaw Chopin Airport",                     city: "Warsaw",              country: "Poland" },
-  { code: "ARN", name: "Stockholm Arlanda Airport",                 city: "Stockholm",           country: "Sweden" },
-  { code: "CPH", name: "Copenhagen Airport",                        city: "Copenhagen",          country: "Denmark" },
-  { code: "HEL", name: "Helsinki-Vantaa Airport",                   city: "Helsinki",            country: "Finland" },
-  { code: "OSL", name: "Oslo Gardermoen Airport",                   city: "Oslo",                country: "Norway" },
-  { code: "DUB", name: "Dublin Airport",                            city: "Dublin",              country: "Ireland" },
-  { code: "LIS", name: "Lisbon Humberto Delgado Airport",           city: "Lisbon",              country: "Portugal" },
-  { code: "OPO", name: "Francisco de Sá Carneiro Airport",          city: "Porto",               country: "Portugal" },
-  { code: "BRU", name: "Brussels Airport",                          city: "Brussels",            country: "Belgium" },
-  // ── Russia ──
-  { code: "SVO", name: "Sheremetyevo International",                city: "Moscow",              country: "Russia" },
-  { code: "DME", name: "Domodedovo International",                  city: "Moscow",              country: "Russia" },
-  { code: "VKO", name: "Vnukovo International",                     city: "Moscow",              country: "Russia" },
-  { code: "ZIA", name: "Zhukovsky International",                   city: "Moscow",              country: "Russia" },
-  { code: "LED", name: "Pulkovo Airport",                           city: "St. Petersburg",      country: "Russia" },
-  { code: "OVB", name: "Tolmachevo Airport",                        city: "Novosibirsk",         country: "Russia" },
-  { code: "SVX", name: "Koltsovo International",                    city: "Yekaterinburg",       country: "Russia" },
-  { code: "KZN", name: "Kazan International",                       city: "Kazan",               country: "Russia" },
-  { code: "ROV", name: "Platov International",                      city: "Rostov-on-Don",       country: "Russia" },
-  { code: "AER", name: "Sochi International",                       city: "Sochi",               country: "Russia" },
-  { code: "KRR", name: "Krasnodar Pashkovsky International",        city: "Krasnodar",           country: "Russia" },
-  { code: "UFA", name: "Ufa International",                         city: "Ufa",                 country: "Russia" },
-  { code: "VVO", name: "Vladivostok International",                 city: "Vladivostok",         country: "Russia" },
-  { code: "IKT", name: "Irkutsk International",                     city: "Irkutsk",             country: "Russia" },
-  { code: "KHV", name: "Khabarovsk Novy Airport",                   city: "Khabarovsk",          country: "Russia" },
-  { code: "CEK", name: "Chelyabinsk Balandino Airport",             city: "Chelyabinsk",         country: "Russia" },
-  { code: "GOJ", name: "Nizhny Novgorod International",             city: "Nizhny Novgorod",     country: "Russia" },
-  { code: "SAM", name: "Kurumoch International",                    city: "Samara",              country: "Russia" },
-  { code: "PEE", name: "Perm Airport",                              city: "Perm",                country: "Russia" },
-  { code: "VOZ", name: "Voronezh International",                    city: "Voronezh",            country: "Russia" },
-  { code: "VOG", name: "Volgograd International",                   city: "Volgograd",           country: "Russia" },
-  { code: "TJM", name: "Roshchino International",                   city: "Tyumen",              country: "Russia" },
-  { code: "OMS", name: "Tsentralny Airport",                        city: "Omsk",                country: "Russia" },
-  { code: "KRO", name: "Kurgan Airport",                            city: "Kurgan",              country: "Russia" },
-  { code: "MMK", name: "Murmansk Airport",                          city: "Murmansk",            country: "Russia" },
-  { code: "ARH", name: "Talagi Airport",                            city: "Arkhangelsk",         country: "Russia" },
-  { code: "ULY", name: "Ulyanovsk Baratayevka Airport",             city: "Ulyanovsk",           country: "Russia" },
-  { code: "GDX", name: "Sokol Airport",                             city: "Magadan",             country: "Russia" },
-  { code: "PKC", name: "Yelizovo Airport",                          city: "Petropavlovsk-Kamchatsky", country: "Russia" },
-  { code: "BTK", name: "Bratsk Airport",                            city: "Bratsk",              country: "Russia" },
-  { code: "YKS", name: "Yakutsk Airport",                           city: "Yakutsk",             country: "Russia" },
-  { code: "UUS", name: "Yuzhno-Sakhalinsk Airport",                 city: "Yuzhno-Sakhalinsk",   country: "Russia" },
-  { code: "HTA", name: "Kadala Airport",                            city: "Chita",               country: "Russia" },
-  { code: "KGD", name: "Khrabrovo Airport",                         city: "Kaliningrad",         country: "Russia" },
-  { code: "ASF", name: "Astrakhan Airport",                         city: "Astrakhan",           country: "Russia" },
-  { code: "MRV", name: "Mineralnyye Vody Airport",                  city: "Mineralnye Vody",     country: "Russia" },
-  { code: "STW", name: "Stavropol Shpakovskoye Airport",            city: "Stavropol",           country: "Russia" },
-  { code: "NAL", name: "Nalchik Airport",                           city: "Nalchik",             country: "Russia" },
-  { code: "MCX", name: "Uytash Airport",                            city: "Makhachkala",         country: "Russia" },
-  { code: "GRV", name: "Grozny Airport",                            city: "Grozny",              country: "Russia" },
-  { code: "IGT", name: "Sunzhenskiy Airport",                       city: "Ingushetia",          country: "Russia" },
-  // ── Americas ──
-  { code: "JFK", name: "John F. Kennedy International",             city: "New York",            country: "USA" },
-  { code: "EWR", name: "Newark Liberty International",              city: "New York",            country: "USA" },
-  { code: "LAX", name: "Los Angeles International",                 city: "Los Angeles",         country: "USA" },
-  { code: "ORD", name: "O'Hare International",                      city: "Chicago",             country: "USA" },
-  { code: "MIA", name: "Miami International",                       city: "Miami",               country: "USA" },
-  { code: "SFO", name: "San Francisco International",               city: "San Francisco",       country: "USA" },
-  { code: "ATL", name: "Hartsfield–Jackson Atlanta International",  city: "Atlanta",             country: "USA" },
-  { code: "DFW", name: "Dallas/Fort Worth International",           city: "Dallas",              country: "USA" },
-  { code: "YYZ", name: "Toronto Pearson International",             city: "Toronto",             country: "Canada" },
-  { code: "YVR", name: "Vancouver International",                   city: "Vancouver",           country: "Canada" },
-  { code: "GRU", name: "São Paulo/Guarulhos International",         city: "São Paulo",           country: "Brazil" },
-  { code: "GIG", name: "Rio de Janeiro/Galeão International",       city: "Rio de Janeiro",      country: "Brazil" },
-  { code: "MEX", name: "Mexico City International",                 city: "Mexico City",         country: "Mexico" },
-  { code: "BOG", name: "El Dorado International",                   city: "Bogotá",              country: "Colombia" },
-  // ── Asia Pacific ──
-  { code: "NRT", name: "Narita International",                      city: "Tokyo",               country: "Japan" },
-  { code: "HND", name: "Haneda Airport",                            city: "Tokyo",               country: "Japan" },
-  { code: "KIX", name: "Kansai International",                      city: "Osaka",               country: "Japan" },
-  { code: "ICN", name: "Incheon International",                     city: "Seoul",               country: "South Korea" },
-  { code: "GMP", name: "Gimpo International",                       city: "Seoul",               country: "South Korea" },
-  { code: "PEK", name: "Beijing Capital International",             city: "Beijing",             country: "China" },
-  { code: "PKX", name: "Beijing Daxing International",              city: "Beijing",             country: "China" },
-  { code: "PVG", name: "Shanghai Pudong International",             city: "Shanghai",            country: "China" },
-  { code: "SHA", name: "Shanghai Hongqiao International",           city: "Shanghai",            country: "China" },
-  { code: "CAN", name: "Guangzhou Baiyun International",            city: "Guangzhou",           country: "China" },
-  { code: "CTU", name: "Chengdu Shuangliu International",           city: "Chengdu",             country: "China" },
-  { code: "HKG", name: "Hong Kong International",                   city: "Hong Kong",           country: "Hong Kong" },
-  { code: "TPE", name: "Taiwan Taoyuan International",              city: "Taipei",              country: "Taiwan" },
-  { code: "SYD", name: "Sydney Kingsford Smith International",      city: "Sydney",              country: "Australia" },
-  { code: "MEL", name: "Melbourne Airport",                         city: "Melbourne",           country: "Australia" },
-  { code: "BNE", name: "Brisbane Airport",                          city: "Brisbane",            country: "Australia" },
-  { code: "PER", name: "Perth Airport",                             city: "Perth",               country: "Australia" },
-  { code: "AKL", name: "Auckland Airport",                          city: "Auckland",            country: "New Zealand" },
-];
-
-const WEB3FORMS_KEY = "c8845256-7de7-475d-a9ec-4f5a046fec6d";
+const WEB3FORMS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_KEY ?? "";
 
 interface EnquiryModalProps { open: boolean; onClose: () => void; }
-interface AirportOption { code: string; name: string; city: string; country: string; }
-
-/* ─── AirportCombobox ─────────────────────────────────────────── */
-function AirportCombobox({
-  label, icon: Icon, value, onChange, placeholder, excludeCode, error,
-}: {
-  label: string; icon: React.ElementType;
-  value: AirportOption | null; onChange: (a: AirportOption | null) => void;
-  placeholder: string; excludeCode?: string; error?: string;
-}) {
-  const [query, setQuery]   = useState("");
-  const [open,  setOpen]    = useState(false);
-  const [customMode, setCustomMode] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  const filtered = AIRPORTS.filter(
-    (a) => a.code !== excludeCode &&
-      (query.length === 0 ||
-        a.city.toLowerCase().includes(query.toLowerCase()) ||
-        a.name.toLowerCase().includes(query.toLowerCase()) ||
-        a.code.toLowerCase().includes(query.toLowerCase()) ||
-        a.country.toLowerCase().includes(query.toLowerCase()))
-  ).slice(0, 25);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-        setCustomMode(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  const displayVal = customMode
-    ? (value?.name ?? "")
-    : value ? `${value.city} (${value.code})` : "";
-
-  const handleCustomSave = () => {
-    const trimmed = query.trim();
-    if (!trimmed) return;
-    onChange({ code: "CUSTOM", name: trimmed, city: trimmed, country: "Custom" });
-    setCustomMode(false);
-    setOpen(false);
-    setQuery("");
-  };
-
-  return (
-    <div className="ap-wrap" ref={ref}>
-      <label className="em-label">{label}</label>
-      <div style={{ position: "relative" }}>
-        {/* Dropdown list — renders above */}
-        {open && (
-          <div className="ap-dropdown">
-            {/* Custom entry option */}
-            {query.trim().length > 0 && (
-              <button
-                type="button"
-                className="ap-item ap-item--custom"
-                onClick={handleCustomSave}
-              >
-                <MapPin size={13} color="#0127FC" style={{ flexShrink: 0 }} />
-                <span>
-                  Use &ldquo;<strong>{query.trim()}</strong>&rdquo; as airport name
-                </span>
-              </button>
-            )}
-            {filtered.length === 0 && query.trim().length === 0 && (
-              <div className="ap-empty">Start typing to search airports…</div>
-            )}
-            {filtered.length === 0 && query.trim().length > 0 && (
-              <div className="ap-empty">No matching airports — use the option above to enter manually.</div>
-            )}
-            {filtered.map((a) => (
-              <button
-                key={a.code}
-                type="button"
-                className="ap-item"
-                onClick={() => { onChange(a); setQuery(""); setOpen(false); setCustomMode(false); }}
-              >
-                <span className="ap-item__code">{a.code}</span>
-                <span className="ap-item__city">
-                  {a.city}
-                  <span className="ap-item__name"> · {a.name}</span>
-                </span>
-                <span className="ap-item__country">{a.country}</span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        <span className="em-icon-wrap"><Icon size={15} color="#FE8100" /></span>
-        <input
-          value={open ? query : displayVal}
-          placeholder={placeholder}
-          onFocus={() => { setQuery(""); setOpen(true); setCustomMode(false); }}
-          onChange={(e) => { setQuery(e.target.value); if (!open) setOpen(true); }}
-          className="em-input"
-          style={{
-            paddingLeft: 38,
-            borderColor: error ? "#ef4444" : open ? "#0127FC" : "#e2e8f0",
-            boxShadow: open ? "0 0 0 3px rgba(1,39,252,0.12)" : "none",
-          }}
-          autoComplete="off"
-        />
-        <span className="em-chevron">
-          <ChevronDown size={14} color="#94a3b8" style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }} />
-        </span>
-      </div>
-      {value?.code === "CUSTOM" && !open && (
-        <p className="em-hint">✏️ Custom airport entered — our team will confirm availability.</p>
-      )}
-      {error && <p className="em-error">{error}</p>}
-    </div>
-  );
-}
-
-/* ─── Counter ─────────────────────────────────────────────────── */
+/* â”€â”€â”€ Counter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function Counter({
   label, sublabel, icon: Icon, value, onChange, min = 0, max = 20,
 }: {
@@ -348,7 +29,7 @@ function Counter({
         </div>
       </div>
       <div className="cnt-row__ctrl">
-        <button type="button" onClick={() => onChange(Math.max(min, value - 1))} disabled={value <= min} className="cnt-btn" data-disabled={value <= min}>−</button>
+        <button type="button" onClick={() => onChange(Math.max(min, value - 1))} disabled={value <= min} className="cnt-btn" data-disabled={value <= min}>âˆ’</button>
         <span className="cnt-val">{value}</span>
         <button type="button" onClick={() => onChange(Math.min(max, value + 1))} disabled={value >= max} className="cnt-btn" data-disabled={value >= max}>+</button>
       </div>
@@ -356,11 +37,11 @@ function Counter({
   );
 }
 
-/* ─── Main Modal ─────────────────────────────────────────────── */
+/* â”€â”€â”€ Main Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
   const [step, setStep]             = useState<1 | 2>(1);
-  const [from, setFrom]             = useState<AirportOption | null>(null);
-  const [to, setTo]                 = useState<AirportOption | null>(null);
+  const [from, setFrom]             = useState<Airport | null>(null);
+  const [to, setTo]                 = useState<Airport | null>(null);
   const [departDate, setDepartDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [tripType, setTripType]     = useState<"one-way" | "round-trip">("round-trip");
@@ -430,26 +111,51 @@ export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
     setSending(true); setApiError("");
     const body = {
       access_key: WEB3FORMS_KEY,
-      subject: `Flight Enquiry: ${from?.city} → ${to?.city}`,
+      subject: `Flight Enquiry: ${from?.city} â†’ ${to?.city}`,
+      from_name: "EdumilesTravels Website",
+      botcheck: "",   // honeypot â€” must be empty string
       name, email, phone,
-      from_airport: `${from?.city} (${from?.code}) – ${from?.name}`,
-      to_airport:   `${to?.city} (${to?.code}) – ${to?.name}`,
+      from_airport: `${from?.city} (${from?.iata}) â€“ ${from?.name}`,
+      to_airport:   `${to?.city} (${to?.iata}) â€“ ${to?.name}`,
       trip_type: tripType,
       departure_date: departDate,
       return_date: tripType === "round-trip" ? returnDate : "N/A",
       travel_class: travelClass,
       adults, children, infants,
       total_travellers: totalTravellers,
-      message: message || "—",
+      message: message || "â€”",
     };
     try {
-      const res  = await fetch("https://api.web3forms.com/submit", {
+      const res  = await fetchWithTimeout("https://api.web3forms.com/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (data.success) setDone(true);
+      if (data.success) {
+        setDone(true);
+        // Fire-and-forget DB save â€” never blocks or breaks the form
+        fetch("/api/forms/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            formName: "Flight Enquiry",
+            formSlug: "flight-enquiry",
+            data: {
+              name, email, phone,
+              from_airport:   `${from?.city} (${from?.iata})`,
+              to_airport:     `${to?.city} (${to?.iata})`,
+              trip_type:      tripType,
+              departure_date: departDate,
+              return_date:    tripType === "round-trip" ? returnDate : "",
+              travel_class:   travelClass,
+              adults, children, infants,
+              message: message || "",
+            },
+            sourcePage: typeof window !== "undefined" ? window.location.pathname : "",
+          }),
+        }).catch(() => {});
+      }
       else setApiError(data.message || "Submission failed. Please try again.");
     } catch {
       setApiError("Network error. Please try again.");
@@ -460,7 +166,7 @@ export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
 
   if (!open) return null;
 
-  /* ── Success ── */
+  /* â”€â”€ Success â”€â”€ */
   if (done) {
     return (
       <div ref={overlayRef} className="em-overlay" onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}>
@@ -486,7 +192,7 @@ export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
         <div className="em-header">
           <div>
             <h2 className="em-header__title"><PlaneTakeoff size={18} /> Send Your Enquiry</h2>
-            <p className="em-header__sub">Step {step} of 2 — {step === 1 ? "Flight Details" : "Your Information"}</p>
+            <p className="em-header__sub">Step {step} of 2 â€” {step === 1 ? "Flight Details" : "Your Information"}</p>
           </div>
           <button onClick={onClose} aria-label="Close" className="em-close"><X size={18} /></button>
         </div>
@@ -501,7 +207,7 @@ export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
         <form onSubmit={handleSubmit} noValidate>
           <div className="em-body">
 
-            {/* ══ STEP 1 ══ */}
+            {/* â•â• STEP 1 â•â• */}
             {step === 1 && (
               <>
                 {/* Trip type */}
@@ -518,15 +224,15 @@ export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
                         color:       tripType === t ? "#fff"    : "#64748b",
                       }}
                     >
-                      {t === "round-trip" ? "↔ Round Trip" : "→ One Way"}
+                      {t === "round-trip" ? "â†” Round Trip" : "â†’ One Way"}
                     </button>
                   ))}
                 </div>
 
                 {/* From / To */}
                 <div className="em-row">
-                  <AirportCombobox label="From" icon={PlaneTakeoff} value={from} onChange={setFrom} placeholder="Departure city or airport" excludeCode={to?.code} error={errors.from} />
-                  <AirportCombobox label="To"   icon={PlaneLanding} value={to}   onChange={setTo}   placeholder="Arrival city or airport"   excludeCode={from?.code} error={errors.to} />
+                  <AirportCombobox label="From" value={from} onChange={setFrom} placeholder="Departure city or airport" excludeCode={to?.iata} error={errors.from} variant="modal" />
+                  <AirportCombobox label="To" value={to} onChange={setTo} placeholder="Arrival city or airport" excludeCode={from?.iata} error={errors.to} variant="modal" />
                 </div>
 
                 {/* Dates */}
@@ -575,26 +281,26 @@ export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
                   </label>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     <Counter label="Adults"   sublabel="12+ years"      icon={UserCheck} value={adults}   onChange={setAdults}   min={1} max={9} />
-                    <Counter label="Children" sublabel="2–11 years"     icon={User}      value={children} onChange={setChildren} min={0} max={9} />
+                    <Counter label="Children" sublabel="2â€“11 years"     icon={User}      value={children} onChange={setChildren} min={0} max={9} />
                     <Counter label="Infants"  sublabel="Under 2 years"  icon={Baby}      value={infants}  onChange={setInfants}  min={0} max={adults} />
                   </div>
                   {errors.adults && <p className="em-error">{errors.adults}</p>}
                 </div>
 
                 <button type="button" onClick={handleNext} className="btn-primary em-submit-btn">
-                  Next: Your Details →
+                  Next: Your Details â†’
                 </button>
               </>
             )}
 
-            {/* ══ STEP 2 ══ */}
+            {/* â•â• STEP 2 â•â• */}
             {step === 2 && (
               <>
                 {/* Summary */}
                 <div className="em-summary">
-                  <span className="em-summary__item"><Plane size={13} color="#0127FC" /> <strong style={{ color: "#0127FC" }}>{from?.city} ({from?.code})</strong> → <strong style={{ color: "#0127FC" }}>{to?.city} ({to?.code})</strong></span>
-                  <span className="em-summary__item"><Calendar size={13} color="#475569" /> {departDate}{tripType === "round-trip" ? ` – ${returnDate}` : ""}</span>
-                  <span className="em-summary__item"><Users size={13} color="#475569" /> {totalTravellers} traveller{totalTravellers !== 1 ? "s" : ""} · {travelClass}</span>
+                  <span className="em-summary__item"><Plane size={13} color="#0127FC" /> <strong style={{ color: "#0127FC" }}>{from?.city} ({from?.iata})</strong> â†’ <strong style={{ color: "#0127FC" }}>{to?.city} ({to?.iata})</strong></span>
+                  <span className="em-summary__item"><Calendar size={13} color="#475569" /> {departDate}{tripType === "round-trip" ? ` â€“ ${returnDate}` : ""}</span>
+                  <span className="em-summary__item"><Users size={13} color="#475569" /> {totalTravellers} traveller{totalTravellers !== 1 ? "s" : ""} Â· {travelClass}</span>
                 </div>
 
                 {/* Name */}
@@ -633,7 +339,7 @@ export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
                 {/* Message */}
                 <div className="em-field">
                   <label className="em-label">Additional Notes (optional)</label>
-                  <textarea placeholder="Any special requests, preferred airlines, meal preferences…" value={message}
+                  <textarea placeholder="Any special requests, preferred airlines, meal preferencesâ€¦" value={message}
                     onChange={(e) => setMessage(e.target.value)} rows={3}
                     className="em-input" style={{ paddingLeft: 14, paddingTop: 10, resize: "vertical", minHeight: 80 }} />
                 </div>
@@ -641,10 +347,10 @@ export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
                 {apiError && <p style={{ color: "#ef4444", fontSize: 13, textAlign: "center", margin: 0 }}>{apiError}</p>}
 
                 <div className="em-actions">
-                  <button type="button" onClick={() => setStep(1)} className="em-back-btn">← Back</button>
+                  <button type="button" onClick={() => setStep(1)} className="em-back-btn">â† Back</button>
                   <button type="submit" disabled={sending} className={`em-submit-btn ${sending ? "em-submit-btn--sending" : "btn-primary"}`} style={{ flex: 1 }}>
                     {sending
-                      ? <span className="em-sending"><Loader2 size={16} className="em-spin" /> Sending…</span>
+                      ? <span className="em-sending"><Loader2 size={16} className="em-spin" /> Sendingâ€¦</span>
                       : <span className="em-sending"><Send size={15} /> Send Enquiry</span>}
                   </button>
                 </div>
@@ -655,7 +361,7 @@ export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
       </div>
 
       <style>{`
-        /* ── overlay ── */
+        /* â”€â”€ overlay â”€â”€ */
         .em-overlay {
           position: fixed; inset: 0; z-index: 9999;
           background: rgba(15,23,42,0.6);
@@ -665,7 +371,7 @@ export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
           overflow-y: auto;
         }
 
-        /* ── panel ── */
+        /* â”€â”€ panel â”€â”€ */
         .em-panel {
           width: 100%; max-width: 640px;
           background: #fff;
@@ -689,7 +395,7 @@ export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
         .em-success-title { font-family:'Poppins',sans-serif; font-weight:800; font-size:22px; color:#0f172a; margin-bottom:10px; }
         .em-success-body  { color:#64748b; font-size:14px; line-height:1.75; margin-bottom:24px; }
 
-        /* ── header ── */
+        /* â”€â”€ header â”€â”€ */
         .em-header {
           background: linear-gradient(135deg,#0127FC 0%,#001060 100%);
           border-radius: 20px 20px 0 0;
@@ -709,11 +415,11 @@ export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
         }
         .em-close:hover { background:rgba(255,255,255,0.2); }
 
-        /* ── step bar ── */
+        /* â”€â”€ step bar â”€â”€ */
         .em-steps { display:flex; gap:6px; padding:14px 24px 0; }
         .em-step  { flex:1; height:4px; border-radius:9999px; transition:background 0.3s; }
 
-        /* ── body ── */
+        /* â”€â”€ body â”€â”€ */
         .em-body {
           padding: 18px 24px 24px;
           display: flex; flex-direction: column; gap: 16px;
@@ -762,7 +468,7 @@ export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
         .em-error { color:#ef4444; font-size:11px; margin:4px 0 0; }
         .em-hint  { color:#0127FC; font-size:11px; margin:4px 0 0; }
 
-        /* ── airport dropdown ── */
+        /* â”€â”€ airport dropdown â”€â”€ */
         .ap-wrap { flex:1; min-width:0; }
         .ap-dropdown {
           position:absolute; bottom:calc(100% + 4px); left:0; right:0; z-index:200;
@@ -788,7 +494,7 @@ export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
         .ap-item__country { font-size:11px; color:#94a3b8; flex-shrink:0; padding-left:6px; }
         .ap-empty { padding:14px 16px; color:#94a3b8; font-size:13px; text-align:center; }
 
-        /* ── counter row ── */
+        /* â”€â”€ counter row â”€â”€ */
         .cnt-row {
           display:flex; align-items:center; justify-content:space-between;
           padding:10px 14px; background:#f8fafc; border-radius:10px;
@@ -807,7 +513,7 @@ export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
         .cnt-btn[data-disabled="false"] { border-color:#FE8100; background:#fff5eb; color:#FE8100; }
         .cnt-btn[data-disabled="true"]  { border-color:#e2e8f0; background:#f8fafc; color:#cbd5e1; cursor:not-allowed; }
 
-        /* ── summary strip ── */
+        /* â”€â”€ summary strip â”€â”€ */
         .em-summary {
           background:linear-gradient(135deg,rgba(1,39,252,0.06),rgba(1,39,252,0.03));
           border:1px solid rgba(1,39,252,0.15); border-radius:12px;
@@ -815,7 +521,7 @@ export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
         }
         .em-summary__item { display:inline-flex; align-items:center; gap:6px; font-size:13px; color:#334155; }
 
-        /* ── actions ── */
+        /* â”€â”€ actions â”€â”€ */
         .em-actions { display:flex; gap:10px; }
         .em-back-btn {
           flex:0 0 auto; padding:12px 18px; border-radius:10px;
@@ -832,14 +538,14 @@ export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
         .em-sending { display:flex; align-items:center; justify-content:center; gap:8px; }
         .em-spin { animation:spin 1s linear infinite; }
 
-        /* ── keyframes ── */
+        /* â”€â”€ keyframes â”€â”€ */
         @keyframes spin     { to { transform:rotate(360deg); } }
         @keyframes modalIn  {
           from { opacity:0; transform:translateY(20px) scale(0.97); }
           to   { opacity:1; transform:translateY(0) scale(1); }
         }
 
-        /* ── MOBILE ── */
+        /* â”€â”€ MOBILE â”€â”€ */
         @media (max-width: 600px) {
           .em-overlay { padding: 0; align-items: flex-end; }
           .em-panel {
@@ -867,3 +573,7 @@ export default function EnquiryModal({ open, onClose }: EnquiryModalProps) {
     </div>
   );
 }
+
+
+
+

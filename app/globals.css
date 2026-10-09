@@ -198,3 +198,24 @@ h1,h2,h3,h4,h5,h6 {
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255,255,255,0.22);
 }
+
+/* Package detail breadcrumb links */
+.breadcrumb-link {
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+.breadcrumb-link:hover {
+  color: #FE8100;
+}
+
+/* ── Hero booking card — responsive ──────────────────────────── */
+/* On very small screens, force single-column layout for the
+   auto-fit grid inside the booking card panels */
+@media (max-width: 480px) {
+  #tabpanel-flights  > div:first-of-type,
+  #tabpanel-packages > div:first-of-type {
+    grid-template-columns: 1fr !important;
+  }
+}

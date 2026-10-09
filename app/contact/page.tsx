@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { fetchWithTimeout } from "@/lib/fetchWithTimeout";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import {
@@ -10,7 +11,7 @@ import {
 import { FaInstagram, FaFacebookF, FaYoutube } from "react-icons/fa";
 import { useScrollAnimation } from "../hooks/useScrollAnimation";
 
-const WEB3FORMS_KEY = "c8845256-7de7-475d-a9ec-4f5a046fec6d";
+const WEB3FORMS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_KEY ?? "";
 
 const interests = [
   "Adventure Tours",
@@ -163,13 +164,34 @@ export default function ContactPage() {
         message: form.message         || "No message provided",
         botcheck: "",
       };
-      const res  = await fetch("https://api.web3forms.com/submit", {
+      const res  = await fetchWithTimeout("https://api.web3forms.com/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (data.success) { setDone(true); }
+      if (data.success) {
+        setDone(true);
+        // Fire-and-forget DB save — never blocks or breaks the form
+        fetch("/api/forms/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: AbortSignal.timeout(5000),
+          body: JSON.stringify({
+            formName: "Contact Form",
+            formSlug: "contact-form",
+            data: {
+              name:         form.name,
+              email:        form.email,
+              phone:        form.phone,
+              destination:  form.destination || "",
+              package_type: form.interest    || "",
+              message:      form.message     || "",
+            },
+            sourcePage: typeof window !== "undefined" ? window.location.pathname : "/contact",
+          }),
+        }).catch(() => {});
+      }
       else { setApiError(data.message || "Something went wrong. Please try again."); }
     } catch {
       setApiError("Network error. Please check your connection and try again.");

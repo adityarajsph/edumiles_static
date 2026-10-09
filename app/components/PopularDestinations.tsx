@@ -1,19 +1,59 @@
 "use client";
 
 import { MapPin, Star } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useScrollAnimation } from "../hooks/useScrollAnimation";
 
-const destinations = [
-  { name: "Goa, India",         image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=600&q=80", rating: 4.9, tours: 48, tag: "Beach",    tagColor: "#3b82f6" },
-  { name: "Manali, Himachal",   image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=600&q=80", rating: 4.8, tours: 35, tag: "Adventure", tagColor: "#10b981" },
-  { name: "Rajasthan, India",   image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=600&q=80", rating: 4.9, tours: 52, tag: "Heritage",  tagColor: "#f59e0b" },
-  { name: "Kerala, India",      image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=600&q=80", rating: 4.8, tours: 41, tag: "Nature",    tagColor: "#059669" },
-  { name: "Varanasi, UP",       image: "https://images.unsplash.com/photo-1561361058-c24cecae35ca?w=600&q=80", rating: 4.7, tours: 29, tag: "Religious",  tagColor: "#FE8100" },
-  { name: "Andaman Islands",    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80", rating: 4.9, tours: 33, tag: "Island",    tagColor: "#06b6d4" },
+// Static fallback — shown instantly while the DB call resolves
+const STATIC_DESTINATIONS = [
+  { name: "Goa, India",       slug: "goa-india",       image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=600&q=80", rating: 4.9, packageCount: 0, tag: "Beach",    tagColor: "#3b82f6" },
+  { name: "Manali, Himachal", slug: "manali-himachal",  image: "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?w=600&q=80", rating: 4.8, packageCount: 0, tag: "Adventure", tagColor: "#10b981" },
+  { name: "Rajasthan",        slug: "rajasthan-india",  image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=600&q=80", rating: 4.9, packageCount: 0, tag: "Heritage",  tagColor: "#f59e0b" },
+  { name: "Kerala",           slug: "kerala-india",     image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=600&q=80", rating: 4.8, packageCount: 0, tag: "Nature",    tagColor: "#059669" },
+  { name: "Varanasi",         slug: "varanasi-up",      image: "https://images.unsplash.com/photo-1561361058-c24cecae35ca?w=600&q=80", rating: 4.7, packageCount: 0, tag: "Religious",  tagColor: "#FE8100" },
+  { name: "Andaman Islands",  slug: "andaman-islands",  image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80", rating: 4.9, packageCount: 0, tag: "Island",    tagColor: "#06b6d4" },
 ];
+
+interface DestinationItem {
+  name: string;
+  slug: string;
+  image: string;
+  rating: number;
+  packageCount: number;
+  tag: string;
+  tagColor: string;
+}
 
 export default function PopularDestinations() {
   const { ref, isVisible } = useScrollAnimation();
+  const [destinations, setDestinations] = useState<DestinationItem[]>(STATIC_DESTINATIONS);
+
+  useEffect(() => {
+    fetch("/api/destinations?counts=true")
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && Array.isArray(d.data) && d.data.length > 0) {
+          // Only show featured destinations; fall back to static if none marked featured
+          const featured: DestinationItem[] = d.data
+            .filter((dest: { isFeatured: boolean }) => dest.isFeatured)
+            .map((dest: {
+              name: string; slug: string; image: string;
+              tag: string; tagColor: string; packageCount: number;
+            }) => ({
+              name:         dest.name || "",
+              slug:         dest.slug || "",
+              image:        dest.image || "",
+              rating:       4.8, // use stored rating if you add that field later
+              packageCount: dest.packageCount ?? 0,
+              tag:          dest.tag || "Tours",
+              tagColor:     dest.tagColor || "#FE8100",
+            }));
+          if (featured.length > 0) setDestinations(featured);
+        }
+      })
+      .catch(() => { /* keep static fallback */ });
+  }, []);
 
   return (
     <section id="destinations" style={{ padding: "96px 24px", background: "#fff" }}>
@@ -35,7 +75,7 @@ export default function PopularDestinations() {
         {/* Grid */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 24 }}>
           {destinations.map((d, i) => (
-            <DestCard key={d.name} d={d} i={i} isVisible={isVisible} />
+            <DestCard key={d.slug} d={d} i={i} isVisible={isVisible} />
           ))}
         </div>
       </div>
@@ -43,20 +83,30 @@ export default function PopularDestinations() {
   );
 }
 
-function DestCard({ d, i, isVisible }: { d: typeof destinations[0]; i: number; isVisible: boolean }) {
+function DestCard({ d, i, isVisible }: { d: DestinationItem; i: number; isVisible: boolean }) {
   return (
-    <div
+    <Link
+      href={`/destinations/${d.slug}`}
       style={{
-        position: "relative", borderRadius: 24, overflow: "hidden",
-        cursor: "pointer", height: 280,
+        display: "block", position: "relative",
+        borderRadius: 24, overflow: "hidden",
+        height: 280, textDecoration: "none",
         opacity: isVisible ? 1 : 0,
         transform: isVisible ? "translateY(0)" : "translateY(32px)",
         transition: `opacity 0.6s ease ${i * 80}ms, transform 0.6s ease ${i * 80}ms`,
         boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
       }}
       className="dest-card"
+      aria-label={`Explore ${d.name} — ${d.packageCount} tours`}
     >
-      <img src={d.image} alt={d.name} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.7s ease" }} className="dest-img" />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={d.image}
+        alt={d.name}
+        loading="lazy"
+        style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.7s ease" }}
+        className="dest-img"
+      />
       <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)" }} />
 
       {/* Tag */}
@@ -79,18 +129,27 @@ function DestCard({ d, i, isVisible }: { d: typeof destinations[0]; i: number; i
       </div>
 
       {/* Info */}
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px 20px 20px" }}>
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px" }}>
         <h3 style={{ fontFamily: "'Poppins',sans-serif", fontWeight: 800, fontSize: 18, color: "#fff", marginBottom: 4 }}>{d.name}</h3>
-        <p style={{ display: "flex", alignItems: "center", gap: 4, color: "rgba(255,255,255,0.7)", fontSize: 12 }}>
-          <MapPin size={11} />{d.tours} tours available
+        <p style={{ display: "flex", alignItems: "center", gap: 4, color: "rgba(255,255,255,0.7)", fontSize: 12, margin: 0 }}>
+          <MapPin size={11} />
+          {d.packageCount > 0
+            ? `${d.packageCount} ${d.packageCount === 1 ? "tour" : "tours"} available`
+            : "Explore tours"}
         </p>
       </div>
 
       <style>{`
         .dest-card:hover .dest-img { transform: scale(1.08); }
-        .dest-card { transition: box-shadow 0.3s ease, transform 0.3s ease !important; }
-        .dest-card:hover { box-shadow: 0 16px 48px rgba(0,0,0,0.22) !important; transform: translateY(-6px) !important; }
+        .dest-card {
+          transition: box-shadow 0.3s ease, transform 0.3s ease,
+            opacity 0.6s ease, opacity 0.6s ease !important;
+        }
+        .dest-card:hover {
+          box-shadow: 0 16px 48px rgba(0,0,0,0.22) !important;
+          transform: translateY(-6px) !important;
+        }
       `}</style>
-    </div>
+    </Link>
   );
 }
