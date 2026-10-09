@@ -6,16 +6,9 @@
 
 import mongoose from "mongoose";
 
-// On Windows dev machines Node's SRV DNS resolver can fail (ECONNREFUSED).
-// MONGODB_URI_DIRECT is a fallback that bypasses SRV by listing shards directly.
-const MONGODB_URI = (process.env.MONGODB_URI_DIRECT || process.env.MONGODB_URI) as string;
-
-if (!MONGODB_URI) {
-  // Only throw at request time, not at build time (where env may be absent)
-  if (process.env.NODE_ENV !== "production") {
-    console.warn("⚠️  MONGODB_URI is not set. Database features will be unavailable.");
-  }
-}
+// NOTE: Do NOT read MONGODB_URI at module level — Next.js evaluates modules
+// during the build phase where env vars are not yet injected. Read it lazily
+// inside connectDB() so it is resolved at request time.
 
 // Extend the NodeJS global type to hold the cached connection
 interface MongooseCache {
@@ -34,6 +27,9 @@ if (!globalForMongoose.mongooseCache) {
 const cache = globalForMongoose.mongooseCache;
 
 export async function connectDB(): Promise<typeof mongoose> {
+  // Read at request time (not module load time) so Amplify/Lambda env vars are available
+  const MONGODB_URI = (process.env.MONGODB_URI_DIRECT || process.env.MONGODB_URI) as string;
+
   if (!MONGODB_URI) {
     throw new Error("MONGODB_URI environment variable is not set.");
   }
