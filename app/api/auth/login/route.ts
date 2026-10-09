@@ -37,7 +37,9 @@ export async function POST(req: NextRequest) {
       { status: 200, headers: { "Set-Cookie": cookieHeader } }
     );
   } catch (err) {
-    console.error("[AUTH LOGIN]", err);
-    return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });
+    const message = err instanceof Error ? err.message : String(err);
+    const stack   = err instanceof Error ? err.stack   : undefined;
+    console.error("[AUTH LOGIN ERROR]", { message, stack, mongoUri: !!process.env.MONGODB_URI, mongoUriDirect: !!process.env.MONGODB_URI_DIRECT, jwtSecret: !!process.env.JWT_SECRET });
+    return NextResponse.json({ success: false, message: "Server error", detail: message }, { status: 500 });
   }
 }
