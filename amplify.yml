@@ -6,7 +6,19 @@ frontend:
         - npm ci
     build:
       commands:
-        - env | grep -E '^(ADMIN_EMAIL|ADMIN_PASSWORD|CLOUDINARY_API_KEY|CLOUDINARY_API_SECRET|CLOUDINARY_CLOUD_NAME|JWT_SECRET|MONGODB_URI|MONGODB_URI_DIRECT)=' >> .env.production
+        - |
+          rm -f .env.production
+          for VAR in ADMIN_EMAIL ADMIN_PASSWORD CLOUDINARY_API_KEY CLOUDINARY_API_SECRET CLOUDINARY_CLOUD_NAME JWT_SECRET MONGODB_URI MONGODB_URI_DIRECT NEXT_PUBLIC_SITE_URL NEXT_PUBLIC_WEB3FORMS_KEY; do
+            VALUE="$(printenv "$VAR" || true)"
+            if [ -n "$VALUE" ]; then
+              ESCAPED="$(printf '%s' "$VALUE" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e 's/\$/\\$/g')"
+              printf '%s="%s"\n' "$VAR" "$ESCAPED" >> .env.production
+            else
+              echo "WARNING: $VAR is empty or not set in Amplify"
+            fi
+          done
+        - echo "Variables written to .env.production (names only):"
+        - cut -d= -f1 .env.production
         - npm run build
   artifacts:
     baseDirectory: .next
